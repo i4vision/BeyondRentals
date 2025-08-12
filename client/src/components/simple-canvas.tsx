@@ -8,12 +8,12 @@ interface SimpleCanvasProps {
 export default function SimpleCanvas({ onSignatureChange }: SimpleCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDrawingRef = useRef(false);
+  const initializedRef = useRef(false);
 
-  useEffect(() => {
+  const initializeCanvas = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || initializedRef.current) return;
 
-    // Initialize canvas
     canvas.width = 400;
     canvas.height = 120;
     const ctx = canvas.getContext('2d')!;
@@ -23,14 +23,26 @@ export default function SimpleCanvas({ onSignatureChange }: SimpleCanvasProps) {
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
 
+    initializedRef.current = true;
     console.log('Canvas initialized:', canvas.width, 'x', canvas.height);
+  };
+
+  useEffect(() => {
+    initializeCanvas();
   }, []);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     console.log('Start drawing');
+    initializeCanvas(); // Ensure canvas is initialized
+    
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
     const ctx = canvas.getContext('2d')!;
+    
+    // Set drawing styles each time to ensure they persist
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
     
     isDrawingRef.current = true;
     
@@ -69,6 +81,9 @@ export default function SimpleCanvas({ onSignatureChange }: SimpleCanvasProps) {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext('2d')!;
     
+    // Clear and reset
+    canvas.width = 400;
+    canvas.height = 120;
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = 'black';
