@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 
-import SignaturePadNative from "@/components/signature-pad-native";
+import SignaturePadPersistent from "@/components/signature-pad-persistent";
 import FileUpload from "@/components/file-upload";
 import { countryCodes, countries, transportationMethods } from "@shared/schema";
 
@@ -558,8 +558,7 @@ export default function CheckInPage() {
 
                 <div className="mb-6">
                   <Label className="text-sm font-medium text-gray-700 mb-3 block">Digital Signature *</Label>
-                  <SignaturePadNative 
-                    key="signature-pad-persistent" 
+                  <SignaturePadPersistent 
                     onSignatureChange={handleSignatureChange} 
                   />
                 </div>
