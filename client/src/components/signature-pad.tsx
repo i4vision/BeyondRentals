@@ -16,9 +16,9 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = 128; // Fixed height
+    // Set canvas size once
+    canvas.width = 400;
+    canvas.height = 128;
     
     const ctx = canvas.getContext('2d');
     if (ctx) {
@@ -33,11 +33,6 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
 
   useEffect(() => {
     setupCanvas();
-    window.addEventListener('resize', setupCanvas);
-    
-    return () => {
-      window.removeEventListener('resize', setupCanvas);
-    };
   }, [setupCanvas]);
 
   const getEventPos = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -78,8 +73,6 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const pos = getEventPos(e);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
 
     if (!hasSignature) {
       setHasSignature(true);
@@ -88,7 +81,14 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
   };
 
   const stopDrawing = () => {
-    setIsDrawing(false);
+    if (isDrawing) {
+      setIsDrawing(false);
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      if (ctx) {
+        ctx.beginPath(); // Start fresh path for next stroke
+      }
+    }
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
@@ -115,8 +115,6 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const pos = getEventPos(e);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
 
     if (!hasSignature) {
       setHasSignature(true);
@@ -126,7 +124,14 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
-    setIsDrawing(false);
+    if (isDrawing) {
+      setIsDrawing(false);
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      if (ctx) {
+        ctx.beginPath(); // Start fresh path for next stroke
+      }
+    }
   };
 
   const clearSignature = () => {
