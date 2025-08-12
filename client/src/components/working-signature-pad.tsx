@@ -12,7 +12,7 @@ export default function WorkingSignaturePad({ onSignatureChange }: WorkingSignat
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || canvas.width > 0) return; // Don't reinitialize if already setup
     
     canvas.width = 400;
     canvas.height = 120;
@@ -24,12 +24,21 @@ export default function WorkingSignaturePad({ onSignatureChange }: WorkingSignat
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, 400, 120);
     
-    console.log('Signature pad initialized');
+    console.log('Signature pad initialized once');
   }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    
+    // Ensure canvas is initialized
+    if (canvas.width === 0) {
+      canvas.width = 400;
+      canvas.height = 120;
+      const initCtx = canvas.getContext('2d')!;
+      initCtx.fillStyle = 'white';
+      initCtx.fillRect(0, 0, 400, 120);
+    }
     
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -44,10 +53,10 @@ export default function WorkingSignaturePad({ onSignatureChange }: WorkingSignat
     // Draw starting dot
     ctx.fillStyle = 'black';
     ctx.beginPath();
-    ctx.arc(x, y, 2, 0, 2 * Math.PI);
+    ctx.arc(x, y, 3, 0, 2 * Math.PI);
     ctx.fill();
     
-    console.log('Drawing started at', x, y);
+    console.log('Drawing started at', x, y, 'Canvas dims:', canvas.width, canvas.height);
     onSignatureChange(canvas.toDataURL());
   };
 
