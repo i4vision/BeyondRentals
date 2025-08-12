@@ -11,6 +11,8 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
   const [strokes, setStrokes] = useState<{ x: number; y: number }[][]>([]);
   
+  console.log('SignaturePadNative component rendered with strokes:', strokes.length);
+  
   // Debug strokes changes
   useEffect(() => {
     console.log('STROKES STATE CHANGED:', strokes.length, 'strokes');
@@ -128,16 +130,19 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     
     console.log('Stop drawing called, current strokes:', strokes.length);
     
-    // Capture signature after strokes are updated
-    setTimeout(() => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const dataURL = canvas.toDataURL();
+    // Capture signature immediately without timeout to prevent interference
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const dataURL = canvas.toDataURL();
+      console.log('Signature captured with', strokes.length, 'strokes, data length:', dataURL.length);
+      console.log('Strokes data:', strokes);
+      
+      // Use setTimeout to prevent synchronous state update that might cause re-render
+      setTimeout(() => {
         onSignatureChange(dataURL);
-        console.log('Signature captured with', strokes.length, 'strokes, data length:', dataURL.length);
-        console.log('Strokes data:', strokes);
-      }
-    }, 10);
+        console.log('onSignatureChange callback executed');
+      }, 0);
+    }
   };
 
   const clearSignature = () => {

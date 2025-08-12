@@ -553,7 +553,10 @@ export default function CheckInPage() {
 
                 <div className="mb-6">
                   <Label className="text-sm font-medium text-gray-700 mb-3 block">Digital Signature *</Label>
-                  <SignaturePadNative onSignatureChange={setSignatureData} />
+                  <SignaturePadNative 
+                    key="signature-pad-persistent" 
+                    onSignatureChange={setSignatureData} 
+                  />
                 </div>
 
                 <div className="flex items-start space-x-3">
