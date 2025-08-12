@@ -8,6 +8,21 @@ This is a full-stack web application for managing guest check-ins at hospitality
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (August 2025)
+
+### Country Code and Selection Improvements
+- Expanded country codes to 50+ countries with flags, alphabetically sorted by country name
+- Fixed duplicate key issues for countries sharing the same phone code (US/Canada both +1)
+- Added unique keys using country code, country abbreviation, and index
+- Countries list now alphabetically sorted from Argentina to Vietnam
+
+### Digital Signature Functionality
+- Fixed signature pad drawing functionality for both mouse and touch input
+- Improved canvas scaling and coordinate handling for high DPI displays
+- Enhanced signature pad with proper initialization and context setup
+- Added visual "Sign here" placeholder when no signature is present
+- Implemented proper clear signature functionality with context reset
+
 ## System Architecture
 
 ### Frontend Architecture

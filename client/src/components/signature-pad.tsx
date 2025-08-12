@@ -18,8 +18,18 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
 
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#484848';
+      }
     };
 
     resizeCanvas();
@@ -30,6 +40,17 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     };
   }, []);
 
+  const getCoordinates = (e: React.MouseEvent<HTMLCanvasElement> | TouchEvent, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  };
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
     const canvas = canvasRef.current;
@@ -38,14 +59,7 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#484848';
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
+    const { x, y } = getCoordinates(e, canvas);
     ctx.beginPath();
     ctx.moveTo(x, y);
   };
@@ -59,10 +73,7 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
+    const { x, y } = getCoordinates(e, canvas);
     ctx.lineTo(x, y);
     ctx.stroke();
 
@@ -85,7 +96,6 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
-    const touch = e.touches[0];
     setIsDrawing(true);
     
     const canvas = canvasRef.current;
@@ -94,13 +104,9 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#484848';
-
     const rect = canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
+    const x = e.touches[0].clientX - rect.left;
+    const y = e.touches[0].clientY - rect.top;
 
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -110,7 +116,6 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     e.preventDefault();
     if (!isDrawing) return;
 
-    const touch = e.touches[0];
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -118,8 +123,8 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     if (!ctx) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
+    const x = e.touches[0].clientX - rect.left;
+    const y = e.touches[0].clientY - rect.top;
 
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -147,7 +152,16 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear the entire canvas
+    const rect = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    
+    // Reset drawing context
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#484848';
+    
     setHasSignature(false);
     onSignatureChange(null);
   };

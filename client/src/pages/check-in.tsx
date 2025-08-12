@@ -261,9 +261,9 @@ export default function CheckInPage() {
                           <SelectValue placeholder="Code" />
                         </SelectTrigger>
                         <SelectContent>
-                          {countryCodes.map((country) => (
-                            <SelectItem key={country.code} value={country.code}>
-                              {country.flag} {country.code}
+                          {countryCodes.map((country, index) => (
+                            <SelectItem key={`${country.code}-${country.country}-${index}`} value={country.code}>
+                              {country.flag} {country.code} ({country.name})
                             </SelectItem>
                           ))}
                         </SelectContent>
