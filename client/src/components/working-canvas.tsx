@@ -61,13 +61,9 @@ export default function WorkingCanvas({ onSignatureChange }: WorkingCanvasProps)
     const x = (e.clientX - rect.left) * (canvas.width / rect.width);
     const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-    // Continue the current path without calling beginPath again
+    // Continue the current path - don't call beginPath during drawing
     ctx.lineTo(x, y);
     ctx.stroke();
-    
-    // Move to current position for next stroke
-    ctx.beginPath();
-    ctx.moveTo(x, y);
     
     console.log('Drawing stroke at:', x, y);
     onSignatureChange(canvas.toDataURL());
