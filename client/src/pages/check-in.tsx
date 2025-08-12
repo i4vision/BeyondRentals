@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -64,6 +64,11 @@ export default function CheckInPage() {
   });
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
+  
+  const handleSignatureChange = useCallback((signature: string | null) => {
+    console.log('Parent handleSignatureChange called with signature length:', signature?.length || 0);
+    setSignatureData(signature);
+  }, []);
   const [identityFile, setIdentityFile] = useState<File | null>(null);
 
   const form = useForm<CheckInForm>({
@@ -555,7 +560,7 @@ export default function CheckInPage() {
                   <Label className="text-sm font-medium text-gray-700 mb-3 block">Digital Signature *</Label>
                   <SignaturePadNative 
                     key="signature-pad-persistent" 
-                    onSignatureChange={setSignatureData} 
+                    onSignatureChange={handleSignatureChange} 
                   />
                 </div>
 

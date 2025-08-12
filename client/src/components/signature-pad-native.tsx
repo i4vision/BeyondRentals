@@ -1,11 +1,11 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, memo } from "react";
 import { Button } from "@/components/ui/button";
 
 interface SignaturePadNativeProps {
   onSignatureChange: (signature: string | null) => void;
 }
 
-export default function SignaturePadNative({ onSignatureChange }: SignaturePadNativeProps) {
+const SignaturePadNative = memo(function SignaturePadNative({ onSignatureChange }: SignaturePadNativeProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
@@ -203,4 +203,6 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
       </Button>
     </div>
   );
-}
+});
+
+export default SignaturePadNative;
