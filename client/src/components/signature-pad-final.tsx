@@ -20,12 +20,15 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
     if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
       const dataURL = sigCanvas.current.toDataURL();
       onSignatureChange(dataURL);
+      console.log('Signature captured');
+    } else {
+      console.log('Signature is empty');
     }
   };
 
   return (
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
-      <div className="border-2 border-dashed border-gray-300 rounded bg-white">
+      <div className="border-2 border-dashed border-gray-300 rounded bg-white overflow-hidden" style={{ width: '400px', height: '120px' }}>
         <SignatureCanvas
           ref={sigCanvas}
           canvasProps={{
@@ -33,15 +36,19 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
             height: 120,
             className: 'signature-canvas',
             style: {
-              width: '100%',
-              height: '120px'
+              width: '400px',
+              height: '120px',
+              display: 'block'
             }
           }}
           backgroundColor="white"
           penColor="black"
-          minWidth={1}
-          maxWidth={3}
+          minWidth={2}
+          maxWidth={4}
+          dotSize={2}
+          velocityFilterWeight={0.7}
           onEnd={handleEnd}
+          onBegin={() => console.log('Signature started')}
         />
       </div>
       <div className="flex justify-between items-center mt-3">
