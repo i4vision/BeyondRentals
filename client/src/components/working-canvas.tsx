@@ -37,14 +37,13 @@ export default function WorkingCanvas({ onSignatureChange }: WorkingCanvasProps)
     const x = (e.clientX - rect.left) * (canvas.width / rect.width);
     const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
+    // Start a new path for the stroke
     ctx.beginPath();
     ctx.moveTo(x, y);
     
-    // Draw a small dot to ensure we have visible feedback
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(x, y, 2, 0, 2 * Math.PI);
-    ctx.fill();
+    // Draw a visible starting point
+    ctx.lineTo(x + 0.1, y + 0.1); // Tiny line to make it visible
+    ctx.stroke();
     
     console.log('Started drawing at:', x, y);
   };
@@ -62,20 +61,15 @@ export default function WorkingCanvas({ onSignatureChange }: WorkingCanvasProps)
     const x = (e.clientX - rect.left) * (canvas.width / rect.width);
     const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
+    // Continue the current path without calling beginPath again
     ctx.lineTo(x, y);
     ctx.stroke();
     
-    // Debug: Check if canvas has any non-white pixels
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    let hasDrawing = false;
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      if (imageData.data[i] !== 255 || imageData.data[i+1] !== 255 || imageData.data[i+2] !== 255) {
-        hasDrawing = true;
-        break;
-      }
-    }
-    console.log('Drawing stroke - Canvas has drawing:', hasDrawing);
-
+    // Move to current position for next stroke
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    
+    console.log('Drawing stroke at:', x, y);
     onSignatureChange(canvas.toDataURL());
   };
 
