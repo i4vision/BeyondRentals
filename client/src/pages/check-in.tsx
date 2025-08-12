@@ -70,6 +70,11 @@ export default function CheckInPage() {
     setSignatureData(signature);
   }, []);
   const [identityFile, setIdentityFile] = useState<File | null>(null);
+  
+  const handleFileChange = useCallback((file: File | null) => {
+    console.log('Parent handleFileChange called with file:', file ? file.name : 'null');
+    setIdentityFile(file);
+  }, []);
 
   const form = useForm<CheckInForm>({
     resolver: zodResolver(checkInSchema),
@@ -542,9 +547,17 @@ export default function CheckInPage() {
                 </Alert>
 
                 <FileUpload
-                  onFileChange={setIdentityFile}
+                  key="identity-file-upload"
+                  onFileChange={handleFileChange}
                   accept=".jpg,.jpeg,.png,.pdf"
                 />
+                {identityFile && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-800">
+                      <strong>Uploaded:</strong> {identityFile.name} ({Math.round(identityFile.size / 1024)} KB)
+                    </p>
+                  </div>
+                )}
               </AccordionSection>
 
               {/* Terms of Acceptance */}
