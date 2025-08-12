@@ -9,17 +9,16 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
+  const [strokes, setStrokes] = useState<{ x: number; y: number }[][]>([]);
 
-  useEffect(() => {
+  const redrawCanvas = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size
-    canvas.width = 600;
-    canvas.height = 150;
+    // Clear and set background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Set drawing styles
     ctx.strokeStyle = 'black';
@@ -27,10 +26,29 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     
-    // Fill white background
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }, []);
+    // Redraw all strokes
+    strokes.forEach(stroke => {
+      if (stroke.length > 1) {
+        ctx.beginPath();
+        ctx.moveTo(stroke[0].x, stroke[0].y);
+        stroke.slice(1).forEach(point => {
+          ctx.lineTo(point.x, point.y);
+        });
+        ctx.stroke();
+      }
+    });
+  };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Set canvas size
+    canvas.width = 600;
+    canvas.height = 150;
+    
+    redrawCanvas();
+  }, [strokes]);
 
   const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -59,31 +77,22 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     setIsDrawing(true);
     setLastPoint(point);
     
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (ctx) {
-      // Don't clear or reset - just start a new path
-      ctx.beginPath();
-      ctx.moveTo(point.x, point.y);
-      // Draw a small dot to show start point
-      ctx.lineTo(point.x + 0.1, point.y + 0.1);
-      ctx.stroke();
-    }
+    // Start a new stroke
+    setStrokes(prev => [...prev, [point]]);
     console.log('Started drawing at:', point);
   };
 
   const draw = (currentPoint: { x: number; y: number }) => {
     if (!isDrawing || !lastPoint) return;
     
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx) return;
-
-    // Draw line from last point to current point
-    ctx.beginPath();
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    ctx.lineTo(currentPoint.x, currentPoint.y);
-    ctx.stroke();
+    // Add point to current stroke
+    setStrokes(prev => {
+      const newStrokes = [...prev];
+      if (newStrokes.length > 0) {
+        newStrokes[newStrokes.length - 1] = [...newStrokes[newStrokes.length - 1], currentPoint];
+      }
+      return newStrokes;
+    });
     
     setLastPoint(currentPoint);
   };
@@ -94,26 +103,20 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     setIsDrawing(false);
     setLastPoint(null);
     
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (canvas && ctx) {
-      // Force the drawing to stay by setting composite mode
-      ctx.globalCompositeOperation = 'source-over';
-      const dataURL = canvas.toDataURL();
-      onSignatureChange(dataURL);
-      console.log('Signature captured and persisted, data length:', dataURL.length);
-    }
+    // Capture signature after strokes are updated
+    setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const dataURL = canvas.toDataURL();
+        onSignatureChange(dataURL);
+        console.log('Signature captured with', strokes.length, 'strokes, data length:', dataURL.length);
+      }
+    }, 10);
   };
 
   const clearSignature = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (ctx && canvas) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      onSignatureChange(null);
-    }
+    setStrokes([]);
+    onSignatureChange(null);
   };
 
   return (
