@@ -10,6 +10,11 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<{ x: number; y: number } | null>(null);
   const [strokes, setStrokes] = useState<{ x: number; y: number }[][]>([]);
+  
+  // Debug strokes changes
+  useEffect(() => {
+    console.log('STROKES STATE CHANGED:', strokes.length, 'strokes');
+  }, [strokes]);
 
   const redrawCanvas = () => {
     const canvas = canvasRef.current;
@@ -48,6 +53,8 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
   };
 
   useEffect(() => {
+    console.log('useEffect triggered, strokes count:', strokes.length, 'strokes data:', strokes);
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -90,7 +97,11 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     setLastPoint(point);
     
     // Start a new stroke
-    setStrokes(prev => [...prev, [point]]);
+    setStrokes(prev => {
+      const newStrokes = [...prev, [point]];
+      console.log('ADDING NEW STROKE, total strokes will be:', newStrokes.length);
+      return newStrokes;
+    });
     console.log('Started drawing at:', point);
   };
 
@@ -115,6 +126,8 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     setIsDrawing(false);
     setLastPoint(null);
     
+    console.log('Stop drawing called, current strokes:', strokes.length);
+    
     // Capture signature after strokes are updated
     setTimeout(() => {
       const canvas = canvasRef.current;
@@ -122,11 +135,13 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
         const dataURL = canvas.toDataURL();
         onSignatureChange(dataURL);
         console.log('Signature captured with', strokes.length, 'strokes, data length:', dataURL.length);
+        console.log('Strokes data:', strokes);
       }
     }, 10);
   };
 
   const clearSignature = () => {
+    console.log('CLEAR SIGNATURE CALLED - strokes reset to empty');
     setStrokes([]);
     onSignatureChange(null);
   };
