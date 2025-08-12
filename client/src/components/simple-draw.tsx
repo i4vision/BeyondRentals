@@ -12,8 +12,12 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
   const drawingRef = useRef(false);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    console.log('Drawing started');
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.log('No canvas found');
+      return;
+    }
 
     // Setup canvas on first draw
     canvas.width = 500;
@@ -29,6 +33,7 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
     const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
     const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
 
+    console.log('Starting point:', x, y);
     ctx.beginPath();
     ctx.moveTo(x, y);
 
@@ -39,12 +44,14 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
       const newX = ((moveEvent.clientX - rect.left) / rect.width) * canvas.width;
       const newY = ((moveEvent.clientY - rect.top) / rect.height) * canvas.height;
       
+      console.log('Drawing to:', newX, newY);
       ctx.lineTo(newX, newY);
       ctx.stroke();
       onSignatureChange(canvas.toDataURL());
     };
 
     const handleUp = () => {
+      console.log('Drawing stopped');
       drawingRef.current = false;
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
