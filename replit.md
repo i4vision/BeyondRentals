@@ -16,12 +16,13 @@ Preferred communication style: Simple, everyday language.
 - Added unique keys using country code, country abbreviation, and index
 - Countries list now alphabetically sorted from Argentina to Vietnam
 
-### Digital Signature Functionality
-- Fixed signature pad drawing functionality for both mouse and touch input
-- Improved canvas scaling and coordinate handling for high DPI displays
-- Enhanced signature pad with proper initialization and context setup
-- Added visual "Sign here" placeholder when no signature is present
-- Implemented proper clear signature functionality with context reset
+### Digital Signature Functionality (Fixed - August 12, 2025)
+- Resolved critical signature drawing issue that prevented visible strokes
+- Implemented path-based drawing system that stores all signature data
+- Canvas now redraws complete signature on each update to prevent clearing
+- Added proper stroke persistence during continuous drawing operations  
+- Fixed mouse coordinate handling and canvas context management
+- Signature pad now works reliably for both dots and continuous lines
 
 ## System Architecture
 
