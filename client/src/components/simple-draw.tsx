@@ -49,6 +49,9 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
     console.log('Starting point:', x, y);
     ctx.beginPath();
     ctx.moveTo(x, y);
+    // Draw a small dot at start point to ensure something is visible
+    ctx.lineTo(x + 0.1, y + 0.1);
+    ctx.stroke();
 
     // Create event handlers
     const handleMove = (moveEvent: MouseEvent) => {
@@ -60,6 +63,8 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
       console.log('Drawing to:', newX, newY);
       ctx.lineTo(newX, newY);
       ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(newX, newY);
       onSignatureChange(canvas.toDataURL());
     };
 
@@ -95,6 +100,9 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
 
     ctx.beginPath();
     ctx.moveTo(x, y);
+    // Draw a small dot at start point
+    ctx.lineTo(x + 0.1, y + 0.1);
+    ctx.stroke();
 
     // Create event handlers
     const handleTouchMove = (moveEvent: TouchEvent) => {
@@ -107,6 +115,8 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
       
       ctx.lineTo(newX, newY);
       ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(newX, newY);
       onSignatureChange(canvas.toDataURL());
     };
 
