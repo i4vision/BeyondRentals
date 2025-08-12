@@ -35,7 +35,7 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
 
     const ctx = canvas.getContext('2d')!;
     
-    // Set drawing style
+    // Set drawing style (don't reset canvas!)
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
@@ -81,7 +81,7 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
 
     const ctx = canvas.getContext('2d')!;
     
-    // Set drawing style
+    // Set drawing style (don't reset canvas!)
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
@@ -126,10 +126,10 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d')!;
-    canvas.width = 500;
-    canvas.height = 150;
+    // Clear the canvas properly
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 500, 150);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     onSignatureChange(null);
   };
 
