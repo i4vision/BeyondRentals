@@ -39,16 +39,18 @@ export default function SimpleDrawingPad({ onSignatureChange }: SimpleDrawingPad
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Force canvas size
-    canvas.width = 400;
-    canvas.height = 120;
+    // Initialize canvas only if needed
+    if (canvas.width === 0) {
+      canvas.width = 400;
+      canvas.height = 120;
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, 400, 120);
+      console.log('Canvas initialized');
+    }
     
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    // Clear and set white background
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 400, 120);
 
     const pos = getPosition(e);
     isDrawingRef.current = true;
@@ -60,7 +62,7 @@ export default function SimpleDrawingPad({ onSignatureChange }: SimpleDrawingPad
     ctx.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
     ctx.fill();
 
-    console.log('Mouse down at:', pos.x, pos.y, 'Canvas size:', canvas.width, canvas.height);
+    console.log('Mouse down at:', pos.x, pos.y, 'Dot drawn at', pos.x, pos.y);
     onSignatureChange(canvas.toDataURL());
   };
 
