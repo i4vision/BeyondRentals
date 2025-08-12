@@ -20,19 +20,27 @@ export default function FileUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (file: File) => {
+    console.log("File selected:", file.name, "Size:", file.size, "Type:", file.type);
+    
     if (file.size > maxSize) {
       alert("File size exceeds 10MB limit");
       return;
     }
 
+    console.log("File accepted, setting as uploaded file");
     setUploadedFile(file);
     onFileChange(file);
+    console.log("onFileChange callback called");
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("File input change event triggered");
     const file = e.target.files?.[0];
+    console.log("Selected file from input:", file);
     if (file) {
       handleFileSelect(file);
+    } else {
+      console.log("No file selected");
     }
   };
 
@@ -65,6 +73,7 @@ export default function FileUpload({
   };
 
   const openFileDialog = () => {
+    console.log("Opening file dialog...");
     fileInputRef.current?.click();
   };
 
