@@ -17,21 +17,26 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
   };
 
   const handleEnd = () => {
-    // Force a small delay to ensure drawing is complete
-    setTimeout(() => {
-      if (sigCanvas.current) {
-        const dataURL = sigCanvas.current.toDataURL();
-        onSignatureChange(dataURL);
-        console.log('Signature captured with delay, isEmpty:', sigCanvas.current.isEmpty());
-        
-        const canvas = sigCanvas.current.getCanvas();
-        if (canvas) {
-          const rect = canvas.getBoundingClientRect();
-          console.log('Canvas actual size:', canvas.width, 'x', canvas.height);
-          console.log('Canvas display size:', rect.width, 'x', rect.height);
+    if (sigCanvas.current) {
+      // Immediately capture the signature
+      const dataURL = sigCanvas.current.toDataURL();
+      onSignatureChange(dataURL);
+      console.log('Signature captured immediately, isEmpty:', sigCanvas.current.isEmpty());
+      
+      // Force canvas background to ensure visibility
+      const canvas = sigCanvas.current.getCanvas();
+      if (canvas && !sigCanvas.current.isEmpty()) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Set white background behind the signature
+          ctx.globalCompositeOperation = 'destination-over';
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.globalCompositeOperation = 'source-over';
+          console.log('Forced white background for signature persistence');
         }
       }
-    }, 50);
+    }
   };
 
   return (
@@ -55,6 +60,7 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
           minWidth={2}
           maxWidth={4}
           clearOnResize={false}
+          velocityFilterWeight={0.7}
           onEnd={handleEnd}
           onBegin={() => console.log('Signature started')}
         />
