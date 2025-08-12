@@ -21,7 +21,16 @@ export class MemStorage implements IStorage {
   async createCheckIn(insertCheckIn: InsertCheckIn): Promise<CheckIn> {
     const id = randomUUID();
     const checkIn: CheckIn = { 
-      ...insertCheckIn, 
+      ...insertCheckIn,
+      guests: insertCheckIn.guests as Array<{
+        firstName: string;
+        lastName: string;
+        phone: string;
+        email: string;
+      }>,
+      arrivalNotes: insertCheckIn.arrivalNotes || null,
+      signatureData: insertCheckIn.signatureData || null,
+      identityDocumentPath: insertCheckIn.identityDocumentPath || null,
       id,
       createdAt: new Date()
     };

@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
@@ -12,7 +12,7 @@ const upload = multer({
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (req: any, file: any, cb: any) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
@@ -33,7 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the data
       const validatedData = insertCheckInSchema.parse({
         ...formData,
-        identityDocumentPath: req.file ? req.file.path : null,
+        identityDocumentPath: (req as any).file ? (req as any).file.path : null,
       });
 
       const checkIn = await storage.createCheckIn(validatedData);

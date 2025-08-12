@@ -32,12 +32,6 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
-    draw(e);
-  };
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -52,10 +46,25 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    ctx.lineTo(x, y);
-    ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x, y);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
 
     setHasSignature(true);
     onSignatureChange(canvas.toDataURL());
@@ -77,27 +86,58 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     const touch = e.touches[0];
-    const mouseEvent = new MouseEvent('mousedown', {
-      clientX: touch.clientX,
-      clientY: touch.clientY
-    });
-    canvasRef.current?.dispatchEvent(mouseEvent);
+    setIsDrawing(true);
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#484848';
+
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
+    if (!isDrawing) return;
+
     const touch = e.touches[0];
-    const mouseEvent = new MouseEvent('mousemove', {
-      clientX: touch.clientX,
-      clientY: touch.clientY
-    });
-    canvasRef.current?.dispatchEvent(mouseEvent);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    ctx.lineTo(x, y);
+    ctx.stroke();
+
+    setHasSignature(true);
+    onSignatureChange(canvas.toDataURL());
   };
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
     e.preventDefault();
-    const mouseEvent = new MouseEvent('mouseup', {});
-    canvasRef.current?.dispatchEvent(mouseEvent);
+    setIsDrawing(false);
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.beginPath();
+      }
+    }
   };
 
   const clearSignature = () => {
@@ -114,17 +154,25 @@ export default function SignaturePad({ onSignatureChange, className = "" }: Sign
 
   return (
     <div className={`border border-gray-300 rounded-lg p-4 bg-white ${className}`}>
-      <canvas
-        ref={canvasRef}
-        className="w-full h-32 bg-gray-50 cursor-crosshair border-2 border-dashed border-gray-300 rounded"
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseOut={stopDrawing}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      />
+      <div className="relative">
+        <canvas
+          ref={canvasRef}
+          className="w-full h-32 bg-gray-50 cursor-crosshair border-2 border-dashed border-gray-300 rounded touch-none"
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ touchAction: 'none' }}
+        />
+        {!hasSignature && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <p className="text-gray-400 text-sm">Sign here</p>
+          </div>
+        )}
+      </div>
       <div className="mt-3 flex justify-between items-center">
         <p className="text-xs text-gray-500">Sign above using your mouse or touch</p>
         <Button
