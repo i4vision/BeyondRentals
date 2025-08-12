@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eraser } from "lucide-react";
 
@@ -9,160 +9,124 @@ interface WorkingSignatureProps {
 
 export default function WorkingSignature({ onSignatureChange, className = "" }: WorkingSignatureProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [hasSignature, setHasSignature] = useState(false);
-  const [lastX, setLastX] = useState(0);
-  const [lastY, setLastY] = useState(0);
+  const isDrawing = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size
+    const ctx = canvas.getContext('2d')!;
+    
+    // Set canvas dimensions
     canvas.width = 500;
     canvas.height = 150;
-
+    
+    // Clear canvas with white background
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
     // Set drawing styles
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const drawLine = (x0: number, y0: number, x1: number, y1: number) => {
-      ctx.beginPath();
-      ctx.moveTo(x0, y0);
-      ctx.lineTo(x1, y1);
-      ctx.stroke();
-    };
+    let lastX = 0;
+    let lastY = 0;
 
-    const getEventPos = (e: Event) => {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-
-      let clientX: number, clientY: number;
-
-      if (e.type.startsWith('touch')) {
-        const touch = (e as TouchEvent).touches[0] || (e as TouchEvent).changedTouches[0];
-        clientX = touch.clientX;
-        clientY = touch.clientY;
-      } else {
-        clientX = (e as MouseEvent).clientX;
-        clientY = (e as MouseEvent).clientY;
-      }
-
-      return {
-        x: (clientX - rect.left) * scaleX,
-        y: (clientY - rect.top) * scaleY
-      };
-    };
-
-    let drawing = false;
-    let lastPos = { x: 0, y: 0 };
-
-    const startDraw = (e: Event) => {
-      e.preventDefault();
-      drawing = true;
-      const pos = getEventPos(e);
-      lastPos = pos;
-      setIsDrawing(true);
-      setLastX(pos.x);
-      setLastY(pos.y);
-    };
-
-    const draw = (e: Event) => {
-      e.preventDefault();
-      if (!drawing) return;
-
-      const pos = getEventPos(e);
-      drawLine(lastPos.x, lastPos.y, pos.x, pos.y);
-      lastPos = pos;
-      setLastX(pos.x);
-      setLastY(pos.y);
+    function draw(e: MouseEvent) {
+      if (!isDrawing.current) return;
       
-      setHasSignature(true);
-      const dataUrl = canvas.toDataURL();
-      // Use setTimeout to avoid state conflicts
-      setTimeout(() => onSignatureChange(dataUrl), 0);
-    };
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+      
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      
+      [lastX, lastY] = [x, y];
+      onSignatureChange(canvas.toDataURL());
+    }
 
-    const stopDraw = (e: Event) => {
-      e.preventDefault();
-      if (drawing) {
-        drawing = false;
-        setIsDrawing(false);
-      }
-    };
+    function startDrawing(e: MouseEvent) {
+      isDrawing.current = true;
+      const rect = canvas.getBoundingClientRect();
+      lastX = (e.clientX - rect.left) * (canvas.width / rect.width);
+      lastY = (e.clientY - rect.top) * (canvas.height / rect.height);
+    }
+
+    function stopDrawing() {
+      isDrawing.current = false;
+    }
 
     // Add event listeners
-    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDraw);
-    canvas.addEventListener('mouseout', stopDraw);
-    
-    canvas.addEventListener('touchstart', startDraw);
-    canvas.addEventListener('touchmove', draw);
-    canvas.addEventListener('touchend', stopDraw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events for mobile
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent('mousedown', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent('mousemove', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      const mouseEvent = new MouseEvent('mouseup', {});
+      canvas.dispatchEvent(mouseEvent);
+    });
 
     return () => {
-      canvas.removeEventListener('mousedown', startDraw);
+      canvas.removeEventListener('mousedown', startDrawing);
       canvas.removeEventListener('mousemove', draw);
-      canvas.removeEventListener('mouseup', stopDraw);
-      canvas.removeEventListener('mouseout', stopDraw);
-      canvas.removeEventListener('touchstart', startDraw);
-      canvas.removeEventListener('touchmove', draw);
-      canvas.removeEventListener('touchend', stopDraw);
+      canvas.removeEventListener('mouseup', stopDrawing);
+      canvas.removeEventListener('mouseout', stopDrawing);
     };
-  }, []); // Remove dependencies to prevent re-initialization
+  }, [onSignatureChange]);
 
-  const clearSignature = () => {
+  const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.fillStyle = '#ffffff';
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    setHasSignature(false);
     onSignatureChange(null);
   };
 
   return (
     <div className={`border border-gray-300 rounded-lg p-4 bg-white ${className}`}>
-      <div className="relative mb-4">
-        <canvas
-          ref={canvasRef}
-          className="border-2 border-dashed border-gray-300 rounded w-full"
-          style={{
-            touchAction: 'none',
-            cursor: 'crosshair',
-            height: '150px',
-            backgroundColor: 'white'
-          }}
-        />
-        {!hasSignature && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-gray-400 text-sm">Sign here with your mouse or finger</span>
-          </div>
-        )}
-      </div>
-      <div className="flex justify-between items-center">
-        <span className="text-xs text-gray-500">
-          {isDrawing ? 'Drawing...' : 'Click and drag to sign'}
-        </span>
+      <canvas
+        ref={canvasRef}
+        className="w-full border-2 border-dashed border-gray-300 rounded cursor-crosshair"
+        style={{ height: '150px', touchAction: 'none' }}
+      />
+      <div className="flex justify-between items-center mt-3">
+        <span className="text-xs text-gray-500">Draw your signature above</span>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          onClick={clearSignature}
-          className="text-red-600 border-red-200 hover:bg-red-50"
+          onClick={clearCanvas}
+          className="text-red-600"
         >
           <Eraser className="w-4 h-4 mr-1" />
           Clear

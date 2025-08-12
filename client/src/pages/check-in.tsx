@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 
-import SignatureCanvas from "@/components/signature-canvas";
+import WorkingSignature from "@/components/working-signature";
 import FileUpload from "@/components/file-upload";
 import { countryCodes, countries, transportationMethods } from "@shared/schema";
 
@@ -553,7 +553,7 @@ export default function CheckInPage() {
 
                 <div className="mb-6">
                   <Label className="text-sm font-medium text-gray-700 mb-3 block">Digital Signature *</Label>
-                  <SignatureCanvas onSignatureChange={setSignatureData} />
+                  <WorkingSignature onSignatureChange={setSignatureData} />
                 </div>
 
                 <div className="flex items-start space-x-3">
