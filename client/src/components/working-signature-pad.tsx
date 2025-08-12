@@ -50,13 +50,24 @@ export default function WorkingSignaturePad({ onSignatureChange }: WorkingSignat
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Draw starting dot
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(x, y, 3, 0, 2 * Math.PI);
-    ctx.fill();
+    // Draw multiple visible marks at once
+    ctx.fillStyle = 'red';
+    ctx.fillRect(x - 5, y - 5, 10, 10);
     
-    console.log('Drawing started at', x, y, 'Canvas dims:', canvas.width, canvas.height);
+    ctx.fillStyle = 'blue';  
+    ctx.fillRect(x - 3, y - 3, 6, 6);
+    
+    ctx.fillStyle = 'black';
+    ctx.fillRect(x - 1, y - 1, 2, 2);
+    
+    // Also draw with stroke
+    ctx.strokeStyle = 'green';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    console.log('Multiple marks drawn at', x, y, 'Canvas context:', !!ctx);
     onSignatureChange(canvas.toDataURL());
   };
 
@@ -73,17 +84,21 @@ export default function WorkingSignaturePad({ onSignatureChange }: WorkingSignat
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Draw line from last point to current point
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
+    // Draw thick colorful line
+    ctx.strokeStyle = 'purple';
+    ctx.lineWidth = 8;
     ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
     ctx.lineTo(x, y);
     ctx.stroke();
     
+    // Also draw filled rectangles along the path
+    ctx.fillStyle = 'orange';
+    ctx.fillRect(x - 4, y - 4, 8, 8);
+    
     lastPointRef.current = { x, y };
-    console.log('Line drawn to', x, y);
+    console.log('Colorful line drawn to', x, y);
     onSignatureChange(canvas.toDataURL());
   };
 
@@ -110,13 +125,11 @@ export default function WorkingSignaturePad({ onSignatureChange }: WorkingSignat
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
       <canvas
         ref={canvasRef}
-        width={400}
-        height={120}
+        width="400"
+        height="120"
         style={{ 
-          border: '2px dashed #ccc',
-          backgroundColor: 'white',
-          display: 'block',
-          cursor: 'crosshair'
+          border: '2px solid red',
+          display: 'block'
         }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
