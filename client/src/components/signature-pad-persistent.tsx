@@ -167,12 +167,12 @@ export default function SignaturePadPersistent({ onSignatureChange }: SignatureP
 
   return (
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
-      <div className="border-2 border-dashed border-gray-300 rounded bg-white" style={{ width: '600px', height: '150px' }}>
+      <div className="border-2 border-dashed border-gray-300 rounded bg-white p-2" style={{ width: '604px', height: '154px' }}>
         <canvas
           ref={canvasRef}
           width={600}
           height={150}
-          style={{ width: '600px', height: '150px', display: 'block', cursor: 'crosshair' }}
+          style={{ width: '600px', height: '150px', display: 'block', cursor: 'crosshair', border: 'none' }}
           onMouseDown={(e) => {
             e.preventDefault();
             startDrawing(getMousePos(e));
@@ -207,7 +207,7 @@ export default function SignaturePadPersistent({ onSignatureChange }: SignatureP
         type="button" 
         variant="outline" 
         onClick={clearSignature}
-        className="mt-2"
+        className="mt-3"
       >
         Clear Signature
       </Button>
