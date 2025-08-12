@@ -17,40 +17,44 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
   };
 
   const handleEnd = () => {
-    // Always capture signature data, even if drawing appears empty
-    if (sigCanvas.current) {
-      const dataURL = sigCanvas.current.toDataURL();
-      onSignatureChange(dataURL);
-      console.log('Signature captured, isEmpty:', sigCanvas.current.isEmpty());
-      
-      // Force canvas to retain drawing
-      const canvas = sigCanvas.current.getCanvas();
-      if (canvas) {
-        console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+    // Force a small delay to ensure drawing is complete
+    setTimeout(() => {
+      if (sigCanvas.current) {
+        const dataURL = sigCanvas.current.toDataURL();
+        onSignatureChange(dataURL);
+        console.log('Signature captured with delay, isEmpty:', sigCanvas.current.isEmpty());
+        
+        const canvas = sigCanvas.current.getCanvas();
+        if (canvas) {
+          const rect = canvas.getBoundingClientRect();
+          console.log('Canvas actual size:', canvas.width, 'x', canvas.height);
+          console.log('Canvas display size:', rect.width, 'x', rect.height);
+        }
       }
-    }
+    }, 50);
   };
 
   return (
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
-      <div className="border-2 border-dashed border-gray-300 rounded bg-white">
+      <div className="border-2 border-dashed border-gray-300 rounded bg-white" style={{ width: '600px', height: '150px', overflow: 'hidden' }}>
         <SignatureCanvas
           ref={sigCanvas}
           canvasProps={{
             width: 600,
             height: 150,
-            className: 'signature-canvas w-full',
+            className: 'signature-canvas',
             style: {
-              width: '100%',
+              width: '600px',
               height: '150px',
-              display: 'block'
+              display: 'block',
+              touchAction: 'none'
             }
           }}
           backgroundColor="white"
           penColor="black"
           minWidth={2}
           maxWidth={4}
-          throttle={16}
+          clearOnResize={false}
           onEnd={handleEnd}
           onBegin={() => console.log('Signature started')}
         />
