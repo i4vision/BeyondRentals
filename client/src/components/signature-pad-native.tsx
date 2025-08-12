@@ -62,8 +62,12 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (ctx) {
+      // Don't clear or reset - just start a new path
       ctx.beginPath();
       ctx.moveTo(point.x, point.y);
+      // Draw a small dot to show start point
+      ctx.lineTo(point.x + 0.1, point.y + 0.1);
+      ctx.stroke();
     }
     console.log('Started drawing at:', point);
   };
@@ -75,6 +79,9 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     const ctx = canvas?.getContext('2d');
     if (!ctx) return;
 
+    // Draw line from last point to current point
+    ctx.beginPath();
+    ctx.moveTo(lastPoint.x, lastPoint.y);
     ctx.lineTo(currentPoint.x, currentPoint.y);
     ctx.stroke();
     
@@ -88,10 +95,13 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     setLastPoint(null);
     
     const canvas = canvasRef.current;
-    if (canvas) {
+    const ctx = canvas?.getContext('2d');
+    if (canvas && ctx) {
+      // Force the drawing to stay by setting composite mode
+      ctx.globalCompositeOperation = 'source-over';
       const dataURL = canvas.toDataURL();
       onSignatureChange(dataURL);
-      console.log('Signature captured, data length:', dataURL.length);
+      console.log('Signature captured and persisted, data length:', dataURL.length);
     }
   };
 
