@@ -256,13 +256,16 @@ export default function CheckInPage() {
                   <div>
                     <Label>Phone Number *</Label>
                     <div className="flex mt-2">
-                      <Select onValueChange={(value) => form.setValue("phoneCountryCode", value)}>
+                      <Select onValueChange={(value) => {
+                        const code = value.split('-')[0];
+                        form.setValue("phoneCountryCode", code);
+                      }}>
                         <SelectTrigger className="w-32 rounded-r-none">
                           <SelectValue placeholder="Code" />
                         </SelectTrigger>
                         <SelectContent>
                           {countryCodes.map((country, index) => (
-                            <SelectItem key={`${country.code}-${country.country}-${index}`} value={country.code}>
+                            <SelectItem key={`${country.code}-${country.country}-${index}`} value={`${country.code}-${country.country}`}>
                               {country.flag} {country.code} ({country.name})
                             </SelectItem>
                           ))}
