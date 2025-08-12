@@ -117,3 +117,48 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* Enhanced form input styling */
+@layer components {
+  .enhanced-input {
+    border: 2px solid hsl(220 13% 75%) !important;
+    transition: all 0.2s ease-in-out;
+    background-color: white;
+  }
+
+  .enhanced-input:focus {
+    border-color: hsl(203.8863 88.2845% 53.1373%) !important;
+    box-shadow: 0 0 0 2px hsl(203.8863 88.2845% 53.1373% / 0.1) !important;
+  }
+
+  .enhanced-input::placeholder {
+    color: hsl(220 8.9% 55%) !important;
+    opacity: 0.6 !important;
+  }
+
+  .enhanced-select {
+    border: 2px solid hsl(220 13% 75%) !important;
+    background-color: white;
+  }
+
+  .enhanced-select:focus {
+    border-color: hsl(203.8863 88.2845% 53.1373%) !important;
+    box-shadow: 0 0 0 2px hsl(203.8863 88.2845% 53.1373% / 0.1) !important;
+  }
+
+  .enhanced-textarea {
+    border: 2px solid hsl(220 13% 75%) !important;
+    transition: all 0.2s ease-in-out;
+    background-color: white;
+  }
+
+  .enhanced-textarea:focus {
+    border-color: hsl(203.8863 88.2845% 53.1373%) !important;
+    box-shadow: 0 0 0 2px hsl(203.8863 88.2845% 53.1373% / 0.1) !important;
+  }
+
+  .enhanced-textarea::placeholder {
+    color: hsl(220 8.9% 55%) !important;
+    opacity: 0.6 !important;
+  }
+}

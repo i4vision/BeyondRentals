@@ -227,7 +227,7 @@ export default function CheckInPage() {
                       id="firstName"
                       {...form.register("firstName")}
                       placeholder="Enter first name"
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.firstName && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.firstName.message}</p>
@@ -239,7 +239,7 @@ export default function CheckInPage() {
                       id="lastName"
                       {...form.register("lastName")}
                       placeholder="Enter last name"
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.lastName && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.lastName.message}</p>
@@ -252,7 +252,7 @@ export default function CheckInPage() {
                       type="email"
                       {...form.register("email")}
                       placeholder="your.email@example.com"
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.email && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.email.message}</p>
@@ -265,7 +265,7 @@ export default function CheckInPage() {
                         const code = value.split('-')[0];
                         form.setValue("phoneCountryCode", code);
                       }}>
-                        <SelectTrigger className="w-32 rounded-r-none">
+                        <SelectTrigger className="w-32 rounded-r-none enhanced-select">
                           <SelectValue placeholder="Code" />
                         </SelectTrigger>
                         <SelectContent>
@@ -279,7 +279,7 @@ export default function CheckInPage() {
                       <Input
                         {...form.register("phone")}
                         placeholder="555-123-4567"
-                        className="rounded-l-none border-l-0"
+                        className="rounded-l-none border-l-0 enhanced-input"
                       />
                     </div>
                     {(form.formState.errors.phone || form.formState.errors.phoneCountryCode) && (
@@ -294,7 +294,7 @@ export default function CheckInPage() {
                       id="dateOfBirth"
                       type="date"
                       {...form.register("dateOfBirth")}
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.dateOfBirth && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.dateOfBirth.message}</p>
@@ -303,7 +303,7 @@ export default function CheckInPage() {
                   <div>
                     <Label htmlFor="country">Country *</Label>
                     <Select onValueChange={(value) => form.setValue("country", value)}>
-                      <SelectTrigger className="mt-2">
+                      <SelectTrigger className="mt-2 enhanced-select">
                         <SelectValue placeholder="Select your country" />
                       </SelectTrigger>
                       <SelectContent>
@@ -324,7 +324,7 @@ export default function CheckInPage() {
                       id="address"
                       {...form.register("address")}
                       placeholder="123 Main Street, Apt 4B"
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.address && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.address.message}</p>
@@ -336,7 +336,7 @@ export default function CheckInPage() {
                       id="city"
                       {...form.register("city")}
                       placeholder="Enter city"
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.city && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.city.message}</p>
@@ -348,7 +348,7 @@ export default function CheckInPage() {
                       id="postalCode"
                       {...form.register("postalCode")}
                       placeholder="12345"
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.postalCode && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.postalCode.message}</p>
@@ -378,7 +378,7 @@ export default function CheckInPage() {
                       id="arrivalDate"
                       type="date"
                       {...form.register("arrivalDate")}
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.arrivalDate && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.arrivalDate.message}</p>
@@ -390,7 +390,7 @@ export default function CheckInPage() {
                       id="arrivalTime"
                       type="time"
                       {...form.register("arrivalTime")}
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.arrivalTime && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.arrivalTime.message}</p>
@@ -399,7 +399,7 @@ export default function CheckInPage() {
                   <div>
                     <Label htmlFor="travelingBy">Traveling By *</Label>
                     <Select onValueChange={(value) => form.setValue("travelingBy", value)}>
-                      <SelectTrigger className="mt-2">
+                      <SelectTrigger className="mt-2 enhanced-select">
                         <SelectValue placeholder="Select transportation method" />
                       </SelectTrigger>
                       <SelectContent>
@@ -420,7 +420,7 @@ export default function CheckInPage() {
                       id="departureDate"
                       type="date"
                       {...form.register("departureDate")}
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.departureDate && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.departureDate.message}</p>
@@ -432,7 +432,7 @@ export default function CheckInPage() {
                       id="departureTime"
                       type="time"
                       {...form.register("departureTime")}
-                      className="mt-2"
+                      className="mt-2 enhanced-input"
                     />
                     {form.formState.errors.departureTime && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.departureTime.message}</p>
@@ -444,7 +444,7 @@ export default function CheckInPage() {
                       id="arrivalNotes"
                       {...form.register("arrivalNotes")}
                       placeholder="Any special instructions or notes about your arrival..."
-                      className="mt-2"
+                      className="mt-2 enhanced-textarea"
                       rows={3}
                     />
                   </div>
@@ -484,7 +484,7 @@ export default function CheckInPage() {
                             value={guest.firstName}
                             onChange={(e) => updateGuest(index, "firstName", e.target.value)}
                             placeholder="First name"
-                            className="mt-2"
+                            className="mt-2 enhanced-input"
                           />
                         </div>
                         <div>
@@ -493,7 +493,7 @@ export default function CheckInPage() {
                             value={guest.lastName}
                             onChange={(e) => updateGuest(index, "lastName", e.target.value)}
                             placeholder="Last name"
-                            className="mt-2"
+                            className="mt-2 enhanced-input"
                           />
                         </div>
                         <div>
@@ -502,7 +502,7 @@ export default function CheckInPage() {
                             value={guest.phone}
                             onChange={(e) => updateGuest(index, "phone", e.target.value)}
                             placeholder="Phone number"
-                            className="mt-2"
+                            className="mt-2 enhanced-input"
                           />
                         </div>
                         <div>
@@ -512,7 +512,7 @@ export default function CheckInPage() {
                             value={guest.email}
                             onChange={(e) => updateGuest(index, "email", e.target.value)}
                             placeholder="Email address"
-                            className="mt-2"
+                            className="mt-2 enhanced-input"
                           />
                         </div>
                       </div>
