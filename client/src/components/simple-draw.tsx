@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eraser } from "lucide-react";
 
@@ -11,6 +11,20 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
 
+  // Initialize canvas when component mounts
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    canvas.width = 500;
+    canvas.height = 150;
+    const ctx = canvas.getContext('2d')!;
+    
+    // Set white background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, []);
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     console.log('Drawing started');
     const canvas = canvasRef.current;
@@ -19,12 +33,11 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
       return;
     }
 
-    // Setup canvas on first draw
-    canvas.width = 500;
-    canvas.height = 150;
     const ctx = canvas.getContext('2d')!;
+    
+    // Set drawing style
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
@@ -66,12 +79,11 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Setup canvas on first draw
-    canvas.width = 500;
-    canvas.height = 150;
     const ctx = canvas.getContext('2d')!;
+    
+    // Set drawing style
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
