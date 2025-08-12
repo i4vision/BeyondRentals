@@ -70,13 +70,23 @@ export default function SignatureCanvas({ onSignatureChange }: SignatureCanvasPr
     if (canvas.width === 0) {
       canvas.width = 400;
       canvas.height = 120;
+      // Set initial white background
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
     
     drawingRef.current = true;
     const pos = getMousePos(e);
     currentPathRef.current = [pos];
     
-    redrawCanvas();
+    // Draw a small dot immediately for instant feedback
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 2, 0, 2 * Math.PI);
+    ctx.fill();
+    
     console.log('Started path at:', pos.x, pos.y);
   };
 
@@ -84,9 +94,19 @@ export default function SignatureCanvas({ onSignatureChange }: SignatureCanvasPr
     if (!drawingRef.current) return;
     
     const pos = getMousePos(e);
-    currentPathRef.current.push(pos);
+    const lastPos = currentPathRef.current[currentPathRef.current.length - 1];
     
-    redrawCanvas();
+    // Draw line segment immediately
+    const ctx = canvasRef.current!.getContext('2d')!;
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    
+    currentPathRef.current.push(pos);
     onSignatureChange(canvasRef.current!.toDataURL());
     console.log('Added point:', pos.x, pos.y);
   };
@@ -102,7 +122,6 @@ export default function SignatureCanvas({ onSignatureChange }: SignatureCanvasPr
       currentPathRef.current = [];
     }
     
-    redrawCanvas();
     console.log('Finished path, total paths:', pathsRef.current.length);
   };
 
