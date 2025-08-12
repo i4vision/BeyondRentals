@@ -33,13 +33,12 @@ export default function SimpleCanvas({ onSignatureChange }: SimpleCanvasProps) {
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     console.log('Start drawing');
-    initializeCanvas(); // Ensure canvas is initialized
     
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
     const ctx = canvas.getContext('2d')!;
     
-    // Set drawing styles each time to ensure they persist
+    // Only set drawing styles, don't reinitialize canvas
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
