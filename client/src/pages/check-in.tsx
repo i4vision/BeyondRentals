@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
-import { ChevronDown, Shield, Users, Clock, FileText, CheckCircle, ArrowRight, Lock } from "lucide-react";
+import { ChevronDown, Shield, Users, Clock, FileText, CheckCircle, ArrowRight, Lock, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -553,9 +553,21 @@ export default function CheckInPage() {
                 />
                 {identityFile && (
                   <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm text-green-800">
-                      <strong>Uploaded:</strong> {identityFile.name} ({Math.round(identityFile.size / 1024)} KB)
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-green-800">
+                        <strong>Uploaded:</strong> {identityFile.name} ({Math.round(identityFile.size / 1024)} KB)
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleFileChange(null)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Remove
+                      </Button>
+                    </div>
                   </div>
                 )}
               </AccordionSection>
