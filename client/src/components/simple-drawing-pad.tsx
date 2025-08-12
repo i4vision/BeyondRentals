@@ -56,11 +56,23 @@ export default function SimpleDrawingPad({ onSignatureChange }: SimpleDrawingPad
     isDrawingRef.current = true;
     lastPointRef.current = pos;
 
-    // Draw a large visible dot
-    ctx.fillStyle = 'black';
+    // Draw a large visible dot with multiple methods
+    ctx.fillStyle = '#000000';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 6;
+    
+    // Method 1: Fill circle
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
+    ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
     ctx.fill();
+    
+    // Method 2: Stroke circle for extra visibility
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 5, 0, 2 * Math.PI);
+    ctx.stroke();
+    
+    // Method 3: Fill rect as backup
+    ctx.fillRect(pos.x - 3, pos.y - 3, 6, 6);
 
     console.log('Mouse down at:', pos.x, pos.y, 'Dot drawn at', pos.x, pos.y);
     onSignatureChange(canvas.toDataURL());
@@ -77,16 +89,28 @@ export default function SimpleDrawingPad({ onSignatureChange }: SimpleDrawingPad
 
     const pos = getPosition(e);
     
-    // Draw thick line
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 4;
+    // Draw extra thick line with multiple methods
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 8;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     
+    // Method 1: Normal stroke
     ctx.beginPath();
     ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
+    
+    // Method 2: Fill path for extra visibility
+    ctx.fillStyle = '#000000';
+    const dx = pos.x - lastPointRef.current.x;
+    const dy = pos.y - lastPointRef.current.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    for (let i = 0; i < distance; i += 2) {
+      const x = lastPointRef.current.x + (dx * i) / distance;
+      const y = lastPointRef.current.y + (dy * i) / distance;
+      ctx.fillRect(x - 2, y - 2, 4, 4);
+    }
 
     lastPointRef.current = pos;
     console.log('Line drawn to:', pos.x, pos.y, 'Context exists:', !!ctx);
@@ -117,12 +141,14 @@ export default function SimpleDrawingPad({ onSignatureChange }: SimpleDrawingPad
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
       <canvas
         ref={canvasRef}
-        width={400}
-        height={120}
-        className="w-full border-2 border-dashed border-gray-300 rounded bg-white cursor-crosshair"
+        width="400"
+        height="120"
+        className="border-2 border-solid border-gray-400 rounded cursor-crosshair"
         style={{ 
+          width: '400px',
           height: '120px', 
           display: 'block',
+          backgroundColor: 'white',
           touchAction: 'none'
         }}
         onMouseDown={handleMouseDown}
