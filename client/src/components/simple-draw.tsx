@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Eraser } from "lucide-react";
 
@@ -9,91 +9,111 @@ interface SimpleDrawProps {
 
 export default function SimpleDraw({ onSignatureChange, className = "" }: SimpleDrawProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = useRef(false);
 
-  const initCanvas = () => {
+  useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return null;
+    if (!canvas) return;
+
+    // Set canvas size
+    canvas.width = 500;
+    canvas.height = 150;
+
+    const ctx = canvas.getContext('2d')!;
     
-    canvas.width = 400;
-    canvas.height = 120;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, 400, 120);
-    ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
+    // Initialize canvas
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 3;
     ctx.lineCap = 'round';
-    
-    return ctx;
-  };
+    ctx.lineJoin = 'round';
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    const ctx = initCanvas();
-    if (!canvas || !ctx) return;
+    let lastX = 0;
+    let lastY = 0;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const getPos = (e: MouseEvent | TouchEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
 
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+      let clientX: number, clientY: number;
+      if (e instanceof TouchEvent) {
+        const touch = e.touches[0] || e.changedTouches[0];
+        clientX = touch.clientX;
+        clientY = touch.clientY;
+      } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      }
 
-    const handleMouseMove = (moveE: MouseEvent) => {
-      const newX = (moveE.clientX - rect.left) * (canvas.width / rect.width);
-      const newY = (moveE.clientY - rect.top) * (canvas.height / rect.height);
-      ctx.lineTo(newX, newY);
+      return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+      };
+    };
+
+    const startDrawing = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      isDrawingRef.current = true;
+      const pos = getPos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+      
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+    };
+
+    const draw = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      if (!isDrawingRef.current) return;
+
+      const pos = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(pos.x, pos.y);
       ctx.stroke();
+      
+      lastX = pos.x;
+      lastY = pos.y;
+      
       onSignatureChange(canvas.toDataURL());
     };
 
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+    const stopDrawing = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      isDrawingRef.current = false;
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
 
-  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    const ctx = initCanvas();
-    if (!canvas || !ctx) return;
+    // Touch events
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
 
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
-
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-
-    const handleTouchMove = (moveE: TouchEvent) => {
-      moveE.preventDefault();
-      const newTouch = moveE.touches[0];
-      const newX = (newTouch.clientX - rect.left) * (canvas.width / rect.width);
-      const newY = (newTouch.clientY - rect.top) * (canvas.height / rect.height);
-      ctx.lineTo(newX, newY);
-      ctx.stroke();
-      onSignatureChange(canvas.toDataURL());
+    return () => {
+      canvas.removeEventListener('mousedown', startDrawing);
+      canvas.removeEventListener('mousemove', draw);
+      canvas.removeEventListener('mouseup', stopDrawing);
+      canvas.removeEventListener('mouseleave', stopDrawing);
+      canvas.removeEventListener('touchstart', startDrawing);
+      canvas.removeEventListener('touchmove', draw);
+      canvas.removeEventListener('touchend', stopDrawing);
     };
-
-    const handleTouchEnd = (endE: TouchEvent) => {
-      endE.preventDefault();
-      document.removeEventListener('touchmove', handleTouchMove);
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-
-    document.addEventListener('touchmove', handleTouchMove);
-    document.addEventListener('touchend', handleTouchEnd);
-  };
+  }, [onSignatureChange]);
 
   const clearSignature = () => {
-    const ctx = initCanvas();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     onSignatureChange(null);
   };
 
@@ -101,15 +121,11 @@ export default function SimpleDraw({ onSignatureChange, className = "" }: Simple
     <div className={`border border-gray-300 rounded-lg p-4 bg-white ${className}`}>
       <canvas
         ref={canvasRef}
-        width={400}
-        height={120}
         className="w-full border-2 border-dashed border-gray-300 rounded bg-white cursor-crosshair"
-        style={{ touchAction: 'none', height: '120px' }}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
+        style={{ touchAction: 'none', height: '150px' }}
       />
       <div className="flex justify-between items-center mt-3">
-        <span className="text-xs text-gray-500">Sign above</span>
+        <span className="text-xs text-gray-500">Click and drag to sign</span>
         <Button
           type="button"
           variant="outline"
