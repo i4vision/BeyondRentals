@@ -36,47 +36,59 @@ export default function SimpleDrawingPad({ onSignatureChange }: SimpleDrawingPad
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const ctx = setupCanvas();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Force canvas size
+    canvas.width = 400;
+    canvas.height = 120;
+    
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Clear and set white background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, 400, 120);
 
     const pos = getPosition(e);
     isDrawingRef.current = true;
     lastPointRef.current = pos;
 
-    // Draw starting point
+    // Draw a large visible dot
     ctx.fillStyle = 'black';
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 1, 0, 2 * Math.PI);
+    ctx.arc(pos.x, pos.y, 3, 0, 2 * Math.PI);
     ctx.fill();
 
-    console.log('Mouse down at:', pos.x, pos.y);
-    onSignatureChange(canvasRef.current!.toDataURL());
+    console.log('Mouse down at:', pos.x, pos.y, 'Canvas size:', canvas.width, canvas.height);
+    onSignatureChange(canvas.toDataURL());
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current) return;
     
-    const ctx = setupCanvas();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const pos = getPosition(e);
     
-    // Set line style every time to prevent it being lost
+    // Draw thick line
     ctx.strokeStyle = 'black';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 4;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.globalCompositeOperation = 'source-over';
     
-    // Draw line from last point to current point
     ctx.beginPath();
     ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
 
     lastPointRef.current = pos;
-    console.log('Line drawn to:', pos.x, pos.y);
-    onSignatureChange(canvasRef.current!.toDataURL());
+    console.log('Line drawn to:', pos.x, pos.y, 'Context exists:', !!ctx);
+    onSignatureChange(canvas.toDataURL());
   };
 
   const handleMouseUp = () => {
@@ -85,9 +97,14 @@ export default function SimpleDrawingPad({ onSignatureChange }: SimpleDrawingPad
   };
 
   const handleClear = () => {
-    const ctx = setupCanvas();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
+    canvas.width = 400;
+    canvas.height = 120;
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, 400, 120);
     onSignatureChange(null);
