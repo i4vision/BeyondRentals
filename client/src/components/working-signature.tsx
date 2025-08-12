@@ -85,10 +85,10 @@ export default function WorkingSignature({ onSignatureChange, className = "" }: 
       setLastX(pos.x);
       setLastY(pos.y);
       
-      if (!hasSignature) {
-        setHasSignature(true);
-      }
-      onSignatureChange(canvas.toDataURL());
+      setHasSignature(true);
+      const dataUrl = canvas.toDataURL();
+      // Use setTimeout to avoid state conflicts
+      setTimeout(() => onSignatureChange(dataUrl), 0);
     };
 
     const stopDraw = (e: Event) => {
@@ -118,7 +118,7 @@ export default function WorkingSignature({ onSignatureChange, className = "" }: 
       canvas.removeEventListener('touchmove', draw);
       canvas.removeEventListener('touchend', stopDraw);
     };
-  }, [hasSignature, onSignatureChange]);
+  }, []); // Remove dependencies to prevent re-initialization
 
   const clearSignature = () => {
     const canvas = canvasRef.current;
