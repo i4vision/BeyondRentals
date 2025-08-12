@@ -39,6 +39,13 @@ export default function WorkingCanvas({ onSignatureChange }: WorkingCanvasProps)
 
     ctx.beginPath();
     ctx.moveTo(x, y);
+    
+    // Draw a small dot to ensure we have visible feedback
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(x, y, 2, 0, 2 * Math.PI);
+    ctx.fill();
+    
     console.log('Started drawing at:', x, y);
   };
 
@@ -57,9 +64,19 @@ export default function WorkingCanvas({ onSignatureChange }: WorkingCanvasProps)
 
     ctx.lineTo(x, y);
     ctx.stroke();
+    
+    // Debug: Check if canvas has any non-white pixels
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let hasDrawing = false;
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      if (imageData.data[i] !== 255 || imageData.data[i+1] !== 255 || imageData.data[i+2] !== 255) {
+        hasDrawing = true;
+        break;
+      }
+    }
+    console.log('Drawing stroke - Canvas has drawing:', hasDrawing);
 
     onSignatureChange(canvas.toDataURL());
-    console.log('Drawing stroke');
   };
 
   const stopDrawing = () => {
