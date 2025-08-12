@@ -17,27 +17,32 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
   };
 
   const handleEnd = () => {
-    if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
+    // Always capture signature data, even if drawing appears empty
+    if (sigCanvas.current) {
       const dataURL = sigCanvas.current.toDataURL();
       onSignatureChange(dataURL);
-      console.log('Signature captured');
-    } else {
-      console.log('Signature is empty');
+      console.log('Signature captured, isEmpty:', sigCanvas.current.isEmpty());
+      
+      // Force canvas to retain drawing
+      const canvas = sigCanvas.current.getCanvas();
+      if (canvas) {
+        console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+      }
     }
   };
 
   return (
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
-      <div className="border-2 border-dashed border-gray-300 rounded bg-white overflow-hidden" style={{ width: '400px', height: '120px' }}>
+      <div className="border-2 border-dashed border-gray-300 rounded bg-white">
         <SignatureCanvas
           ref={sigCanvas}
           canvasProps={{
-            width: 400,
-            height: 120,
-            className: 'signature-canvas',
+            width: 600,
+            height: 150,
+            className: 'signature-canvas w-full',
             style: {
-              width: '400px',
-              height: '120px',
+              width: '100%',
+              height: '150px',
               display: 'block'
             }
           }}
@@ -45,8 +50,7 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
           penColor="black"
           minWidth={2}
           maxWidth={4}
-          dotSize={2}
-          velocityFilterWeight={0.7}
+          throttle={16}
           onEnd={handleEnd}
           onBegin={() => console.log('Signature started')}
         />
