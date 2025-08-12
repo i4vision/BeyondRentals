@@ -19,6 +19,8 @@ export default function FileUpload({
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  console.log("FileUpload component rendered, uploadedFile:", uploadedFile);
+
   const handleFileSelect = (file: File) => {
     console.log("File selected:", file.name, "Size:", file.size, "Type:", file.type);
     
@@ -29,6 +31,7 @@ export default function FileUpload({
 
     console.log("File accepted, setting as uploaded file");
     setUploadedFile(file);
+    console.log("uploadedFile state updated to:", file);
     onFileChange(file);
     console.log("onFileChange callback called");
   };
