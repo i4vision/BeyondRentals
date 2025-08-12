@@ -27,14 +27,22 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     ctx.lineJoin = 'round';
     
     // Redraw all strokes
-    strokes.forEach(stroke => {
-      if (stroke.length > 1) {
+    strokes.forEach((stroke, strokeIndex) => {
+      if (stroke.length > 0) {
         ctx.beginPath();
-        ctx.moveTo(stroke[0].x, stroke[0].y);
-        stroke.slice(1).forEach(point => {
-          ctx.lineTo(point.x, point.y);
-        });
-        ctx.stroke();
+        if (stroke.length === 1) {
+          // Single point - draw a small dot
+          ctx.arc(stroke[0].x, stroke[0].y, 1, 0, 2 * Math.PI);
+          ctx.fill();
+        } else {
+          // Multiple points - draw lines
+          ctx.moveTo(stroke[0].x, stroke[0].y);
+          stroke.slice(1).forEach(point => {
+            ctx.lineTo(point.x, point.y);
+          });
+          ctx.stroke();
+        }
+        console.log(`Drew stroke ${strokeIndex + 1} with ${stroke.length} points`);
       }
     });
   };
@@ -43,11 +51,15 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Set canvas size
-    canvas.width = 600;
-    canvas.height = 150;
+    // Set canvas size only once
+    if (canvas.width !== 600 || canvas.height !== 150) {
+      canvas.width = 600;
+      canvas.height = 150;
+      console.log('Canvas initialized with size:', canvas.width, 'x', canvas.height);
+    }
     
     redrawCanvas();
+    console.log('Redrawn canvas with', strokes.length, 'strokes');
   }, [strokes]);
 
   const getMousePos = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -138,10 +150,14 @@ export default function SignaturePadNative({ onSignatureChange }: SignaturePadNa
           onMouseUp={(e) => {
             e.preventDefault();
             stopDrawing();
+            // Force immediate redraw after mouse up
+            setTimeout(() => redrawCanvas(), 1);
           }}
           onMouseLeave={(e) => {
             e.preventDefault();
             stopDrawing();
+            // Force immediate redraw after mouse leave
+            setTimeout(() => redrawCanvas(), 1);
           }}
           onTouchStart={(e) => {
             e.preventDefault();
