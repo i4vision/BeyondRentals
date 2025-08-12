@@ -167,12 +167,12 @@ export default function SignaturePadPersistent({ onSignatureChange }: SignatureP
 
   return (
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
-      <div className="border-2 border-dashed border-gray-300 rounded bg-white p-2" style={{ width: '604px', height: '154px' }}>
+      <div className="border-2 border-dashed border-gray-300 rounded bg-white flex items-center justify-center" style={{ minHeight: '158px', minWidth: '608px' }}>
         <canvas
           ref={canvasRef}
           width={600}
           height={150}
-          style={{ width: '600px', height: '150px', display: 'block', cursor: 'crosshair', border: 'none' }}
+          style={{ width: '600px', height: '150px', display: 'block', cursor: 'crosshair' }}
           onMouseDown={(e) => {
             e.preventDefault();
             startDrawing(getMousePos(e));
