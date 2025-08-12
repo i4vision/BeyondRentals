@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useCallback } from "react";
 import SignatureCanvas from "react-signature-canvas";
 import { Button } from "@/components/ui/button";
 
@@ -16,51 +16,53 @@ export default function SignaturePadFinal({ onSignatureChange }: SignaturePadFin
     }
   };
 
-  const handleEnd = () => {
+  const handleEnd = useCallback(() => {
     if (sigCanvas.current) {
-      // Immediately capture the signature
-      const dataURL = sigCanvas.current.toDataURL();
-      onSignatureChange(dataURL);
-      console.log('Signature captured immediately, isEmpty:', sigCanvas.current.isEmpty());
-      
-      // Force canvas background to ensure visibility
       const canvas = sigCanvas.current.getCanvas();
-      if (canvas && !sigCanvas.current.isEmpty()) {
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Set white background behind the signature
-          ctx.globalCompositeOperation = 'destination-over';
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.globalCompositeOperation = 'source-over';
-          console.log('Forced white background for signature persistence');
+      console.log('Drawing ended, canvas exists:', !!canvas);
+      
+      // Multiple capture attempts to ensure we get the signature
+      setTimeout(() => {
+        if (sigCanvas.current) {
+          const dataURL = sigCanvas.current.toDataURL();
+          onSignatureChange(dataURL);
+          console.log('Final signature capture, length:', dataURL.length);
         }
-      }
+      }, 10);
+      
+      setTimeout(() => {
+        if (sigCanvas.current) {
+          const dataURL = sigCanvas.current.toDataURL();
+          onSignatureChange(dataURL);
+          console.log('Delayed signature capture, length:', dataURL.length);
+        }
+      }, 100);
+      
+      setTimeout(() => {
+        if (sigCanvas.current) {
+          const dataURL = sigCanvas.current.toDataURL();
+          onSignatureChange(dataURL);
+          console.log('Final delayed capture, length:', dataURL.length);
+        }
+      }, 200);
     }
-  };
+  }, [onSignatureChange]);
 
   return (
     <div className="border border-gray-300 rounded-lg p-4 bg-white">
-      <div className="border-2 border-dashed border-gray-300 rounded bg-white" style={{ width: '600px', height: '150px', overflow: 'hidden' }}>
+      <div className="border-2 border-dashed border-gray-300 rounded bg-white" style={{ width: '600px', height: '150px' }}>
         <SignatureCanvas
           ref={sigCanvas}
           canvasProps={{
             width: 600,
             height: 150,
-            className: 'signature-canvas',
-            style: {
-              width: '600px',
-              height: '150px',
-              display: 'block',
-              touchAction: 'none'
-            }
+            className: 'signature-canvas'
           }}
           backgroundColor="white"
           penColor="black"
-          minWidth={2}
-          maxWidth={4}
+          minWidth={1}
+          maxWidth={3}
           clearOnResize={false}
-          velocityFilterWeight={0.7}
           onEnd={handleEnd}
           onBegin={() => console.log('Signature started')}
         />
