@@ -40,7 +40,12 @@ export default function CloudFileUpload({
       
       // Get upload URL
       console.log('Getting upload parameters...');
-      const response = await apiRequest('/api/objects/upload', 'POST');
+      const response = await fetch('/api/objects/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Failed to get upload URL');
