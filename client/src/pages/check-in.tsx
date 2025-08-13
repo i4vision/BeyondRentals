@@ -92,6 +92,7 @@ export default function CheckInPage() {
         ...data,
         signatureData,
         termsAccepted: data.termsAccepted ? "true" : "false",
+        submittedAt: new Date().toISOString(),
       };
       
       formData.append('data', JSON.stringify(submitData));
@@ -100,6 +101,7 @@ export default function CheckInPage() {
         formData.append('identityDocument', identityFile);
       }
 
+      // Submit to internal API first
       const response = await fetch('/api/check-ins', {
         method: 'POST',
         body: formData,
@@ -109,7 +111,36 @@ export default function CheckInPage() {
         throw new Error('Failed to submit check-in');
       }
 
-      return response.json();
+      const result = await response.json();
+
+      // Send to Azure Logic Apps webhook
+      try {
+        const webhookData = {
+          ...submitData,
+          identityFileName: identityFile?.name || null,
+          identityFileSize: identityFile?.size || null,
+          identityFileType: identityFile?.type || null,
+        };
+
+        const webhookResponse = await fetch('https://prod-03.westus.logic.azure.com:443/workflows/fc307344b6db4d4ca57a0e40dd794ca8/triggers/manual/paths/invoke?api-version=2016-06-01', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(webhookData),
+        });
+
+        if (webhookResponse.ok) {
+          console.log('Webhook submission successful');
+        } else {
+          console.error('Webhook submission failed with status:', webhookResponse.status);
+        }
+      } catch (webhookError) {
+        console.error('Webhook submission failed:', webhookError);
+        // Don't fail the entire submission if webhook fails
+      }
+
+      return result;
     },
     onSuccess: () => {
       toast({
