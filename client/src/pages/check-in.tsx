@@ -99,7 +99,6 @@ export default function CheckInPage() {
       
       const submitData = {
         ...data,
-        signatureData,
         termsAccepted: data.termsAccepted ? "true" : "false",
         submittedAt: new Date().toISOString(),
       };
@@ -128,6 +127,9 @@ export default function CheckInPage() {
           identityFileType: identityFileInfo?.type || null,
           signatureImageData: signatureData || null,
         };
+        
+        console.log('Debug - identityFileInfo:', identityFileInfo);
+        console.log('Debug - signatureData length:', signatureData?.length || 0);
 
         console.log('Sending webhook data:', webhookData);
         console.log('Exact JSON being sent to webhook:', JSON.stringify(webhookData, null, 2));
