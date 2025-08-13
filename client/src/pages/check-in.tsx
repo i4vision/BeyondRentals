@@ -182,6 +182,11 @@ export default function CheckInPage() {
   };
 
   const onSubmit = (data: CheckInForm) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form errors:', form.formState.errors);
+    console.log('Signature data available:', !!signatureData);
+    console.log('Identity file available:', !!identityFile);
+    
     if (!signatureData) {
       toast({
         variant: "destructive",
