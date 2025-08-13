@@ -1,8 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { CloudUpload, FileText, X } from "lucide-react";
-import { ObjectUploader } from "./ObjectUploader";
-import type { UploadResult } from "@uppy/core";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CloudFileUploadProps {
@@ -25,11 +23,23 @@ export default function CloudFileUpload({
     url: string;
   } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   console.log("CloudFileUpload component rendered, uploadedFile:", uploadedFile ? uploadedFile.name : "null");
 
-  const handleGetUploadParameters = async () => {
+  const handleFileSelect = async (file: File) => {
     try {
+      console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+      
+      if (file.size > maxSize) {
+        alert(`File size exceeds ${formatFileSize(maxSize)} limit`);
+        return;
+      }
+
+      setIsUploading(true);
+      
+      // Get upload URL
+      console.log('Getting upload parameters...');
       const response = await apiRequest('/api/objects/upload', 'POST');
       
       if (!response.ok) {
@@ -37,39 +47,53 @@ export default function CloudFileUpload({
       }
       
       const data = await response.json();
-      return {
-        method: 'PUT' as const,
-        url: data.uploadURL,
-      };
-    } catch (error) {
-      console.error('Error getting upload parameters:', error);
-      throw error;
-    }
-  };
+      console.log('Got upload URL:', data.uploadURL);
+      
+      // Upload file directly to cloud storage
+      const uploadResponse = await fetch(data.uploadURL, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
 
-  const handleUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    console.log('Upload completed:', result);
-    
-    if (result.successful && result.successful.length > 0) {
-      const file = result.successful[0];
-      const fileName = file.name || 'unknown';
-      const fileSize = file.size || 0;
-      const fileType = file.type || 'application/octet-stream';
-      const fileUrl = file.uploadURL || '';
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file to cloud storage');
+      }
+
+      console.log('File uploaded successfully to cloud storage');
       
       const fileInfo = {
-        name: fileName,
-        size: fileSize,
-        type: fileType,
-        url: fileUrl,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: data.uploadURL.split('?')[0], // Remove query parameters to get the clean URL
       };
       
       console.log('Setting uploaded file info:', fileInfo);
       setUploadedFile(fileInfo);
-      onFileUploaded(fileUrl, fileName, fileSize, fileType);
+      onFileUploaded(fileInfo.url, fileInfo.name, fileInfo.size, fileInfo.type);
+      
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
-    
-    setIsUploading(false);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input change event triggered');
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleButtonClick = () => {
+    console.log('Upload button clicked');
+    fileInputRef.current?.click();
   };
 
   const removeFile = () => {
@@ -88,28 +112,36 @@ export default function CloudFileUpload({
 
   return (
     <div className={`space-y-4 ${className}`}>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileInputChange}
+        accept={accept}
+        className="hidden"
+      />
+      
       {!uploadedFile ? (
         <div className="space-y-4">
-          <ObjectUploader
-            maxNumberOfFiles={1}
-            maxFileSize={maxSize}
-            onGetUploadParameters={handleGetUploadParameters}
-            onComplete={handleUploadComplete}
-            buttonClassName="w-full h-32 border-2 border-dashed border-gray-300 hover:border-gray-400 bg-gray-50 hover:bg-gray-100 text-gray-600"
+          <Button
+            type="button"
+            onClick={handleButtonClick}
+            disabled={isUploading}
+            className="w-full h-32 border-2 border-dashed border-gray-300 hover:border-gray-400 bg-gray-50 hover:bg-gray-100 text-gray-600"
+            variant="outline"
           >
             <div className="flex flex-col items-center space-y-2">
               <CloudUpload className="h-8 w-8" />
               <div className="text-center">
                 <p className="text-sm font-medium">Upload Identity Document</p>
                 <p className="text-xs text-gray-500">
-                  Click to browse or drag & drop files here
+                  Click to browse files
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
                   PDF, JPG, PNG up to {formatFileSize(maxSize)}
                 </p>
               </div>
             </div>
-          </ObjectUploader>
+          </Button>
           
           {isUploading && (
             <div className="text-center">
