@@ -129,6 +129,7 @@ export default function CheckInPage() {
         };
 
         console.log('Sending webhook data:', webhookData);
+        console.log('Exact JSON being sent to webhook:', JSON.stringify(webhookData, null, 2));
         
         const webhookResponse = await fetch('https://prod-03.westus.logic.azure.com:443/workflows/fc307344b6db4d4ca57a0e40dd794ca8/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J-m90Ua98MJkYH7Kh8D7nr4ydsYbcNZfS7qAacum6XU', {
           method: 'POST',
