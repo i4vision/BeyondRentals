@@ -119,9 +119,14 @@ export default function CheckInPage() {
 
       // Send to Azure Logic Apps webhook
       try {
+        // Convert relative URL to complete URL for webhook
+        const fullIdentityFileUrl = identityFileInfo?.url 
+          ? `${window.location.origin}${identityFileInfo.url}`
+          : null;
+
         const webhookData = {
           ...submitData,
-          identityFileUrl: identityFileInfo?.url || null,
+          identityFileUrl: fullIdentityFileUrl,
           identityFileName: identityFileInfo?.name || null,
           identityFileSize: identityFileInfo?.size || null,
           identityFileType: identityFileInfo?.type || null,
@@ -129,6 +134,7 @@ export default function CheckInPage() {
         };
         
         console.log('Debug - identityFileInfo:', identityFileInfo);
+        console.log('Debug - fullIdentityFileUrl:', fullIdentityFileUrl);
         console.log('Debug - signatureData length:', signatureData?.length || 0);
 
         console.log('Sending webhook data:', webhookData);
