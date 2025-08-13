@@ -122,6 +122,8 @@ export default function CheckInPage() {
           identityFileType: identityFile?.type || null,
         };
 
+        console.log('Sending webhook data:', webhookData);
+        
         const webhookResponse = await fetch('https://prod-03.westus.logic.azure.com:443/workflows/fc307344b6db4d4ca57a0e40dd794ca8/triggers/manual/paths/invoke?api-version=2016-06-01', {
           method: 'POST',
           headers: {
@@ -130,10 +132,12 @@ export default function CheckInPage() {
           body: JSON.stringify(webhookData),
         });
 
+        console.log('Webhook response status:', webhookResponse.status);
         if (webhookResponse.ok) {
           console.log('Webhook submission successful');
         } else {
-          console.error('Webhook submission failed with status:', webhookResponse.status);
+          const errorText = await webhookResponse.text();
+          console.error('Webhook submission failed with status:', webhookResponse.status, 'Error:', errorText);
         }
       } catch (webhookError) {
         console.error('Webhook submission failed:', webhookError);
@@ -162,24 +166,19 @@ export default function CheckInPage() {
   };
 
   const addGuest = () => {
-    const newGuests = [...guests, { firstName: "", lastName: "", phone: "", email: "" }];
+    const currentGuests = form.getValues("guests") || [];
+    const newGuests = [...currentGuests, { firstName: "", lastName: "", phone: "", email: "" }];
     setGuests(newGuests);
     form.setValue("guests", newGuests);
   };
 
   const removeGuest = (index: number) => {
-    if (guests.length > 1) {
-      const newGuests = guests.filter((_, i) => i !== index);
+    const currentGuests = form.getValues("guests") || [];
+    if (currentGuests.length > 1) {
+      const newGuests = currentGuests.filter((_, i) => i !== index);
       setGuests(newGuests);
       form.setValue("guests", newGuests);
     }
-  };
-
-  const updateGuest = (index: number, field: keyof typeof guests[0], value: string) => {
-    const newGuests = [...guests];
-    newGuests[index] = { ...newGuests[index], [field]: value };
-    setGuests(newGuests);
-    form.setValue("guests", newGuests);
   };
 
   const onSubmit = (data: CheckInForm) => {
@@ -517,8 +516,7 @@ export default function CheckInPage() {
                         <div>
                           <Label>First Name *</Label>
                           <Input
-                            value={guest.firstName}
-                            onChange={(e) => updateGuest(index, "firstName", e.target.value)}
+                            {...form.register(`guests.${index}.firstName`)}
                             placeholder="First name"
                             className="mt-2 enhanced-input"
                           />
@@ -526,8 +524,7 @@ export default function CheckInPage() {
                         <div>
                           <Label>Last Name *</Label>
                           <Input
-                            value={guest.lastName}
-                            onChange={(e) => updateGuest(index, "lastName", e.target.value)}
+                            {...form.register(`guests.${index}.lastName`)}
                             placeholder="Last name"
                             className="mt-2 enhanced-input"
                           />
@@ -535,8 +532,7 @@ export default function CheckInPage() {
                         <div>
                           <Label>Phone *</Label>
                           <Input
-                            value={guest.phone}
-                            onChange={(e) => updateGuest(index, "phone", e.target.value)}
+                            {...form.register(`guests.${index}.phone`)}
                             placeholder="Phone number"
                             className="mt-2 enhanced-input"
                           />
@@ -545,8 +541,7 @@ export default function CheckInPage() {
                           <Label>Email *</Label>
                           <Input
                             type="email"
-                            value={guest.email}
-                            onChange={(e) => updateGuest(index, "email", e.target.value)}
+                            {...form.register(`guests.${index}.email`)}
                             placeholder="Email address"
                             className="mt-2 enhanced-input"
                           />
