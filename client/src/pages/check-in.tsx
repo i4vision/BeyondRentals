@@ -301,7 +301,9 @@ export default function CheckInPage() {
                   <div>
                     <Label>Phone Number *</Label>
                     <div className="flex mt-2">
-                      <Select onValueChange={(value) => {
+                      <Select 
+                      value={form.watch("phoneCountryCode") || ""}
+                      onValueChange={(value) => {
                         const code = value.split('-')[0];
                         form.setValue("phoneCountryCode", code);
                       }}>
@@ -342,7 +344,9 @@ export default function CheckInPage() {
                   </div>
                   <div>
                     <Label htmlFor="country">Country *</Label>
-                    <Select onValueChange={(value) => form.setValue("country", value)}>
+                    <Select 
+                      value={form.watch("country") || ""}
+                      onValueChange={(value) => form.setValue("country", value)}>
                       <SelectTrigger className="mt-2 enhanced-select">
                         <SelectValue placeholder="Select your country" />
                       </SelectTrigger>
@@ -438,7 +442,9 @@ export default function CheckInPage() {
                   </div>
                   <div>
                     <Label htmlFor="travelingBy">Traveling By *</Label>
-                    <Select onValueChange={(value) => form.setValue("travelingBy", value)}>
+                    <Select 
+                      value={form.watch("travelingBy") || ""}
+                      onValueChange={(value) => form.setValue("travelingBy", value)}>
                       <SelectTrigger className="mt-2 enhanced-select">
                         <SelectValue placeholder="Select transportation method" />
                       </SelectTrigger>
