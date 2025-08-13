@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 
 import SignaturePadPersistent from "@/components/signature-pad-persistent";
-import FileUpload from "@/components/file-upload";
+import CloudFileUpload from "@/components/cloud-file-upload";
 import { countryCodes, countries, transportationMethods } from "@shared/schema";
 
 const guestSchema = z.object({
@@ -69,11 +69,20 @@ export default function CheckInPage() {
     console.log('Parent handleSignatureChange called with signature length:', signature?.length || 0);
     setSignatureData(signature);
   }, []);
-  const [identityFile, setIdentityFile] = useState<File | null>(null);
+  const [identityFileInfo, setIdentityFileInfo] = useState<{
+    url: string;
+    name: string;
+    size: number;
+    type: string;
+  } | null>(null);
   
-  const handleFileChange = useCallback((file: File | null) => {
-    console.log('Parent handleFileChange called with file:', file ? file.name : 'null');
-    setIdentityFile(file);
+  const handleFileUploaded = useCallback((fileUrl: string, fileName: string, fileSize: number, fileType: string) => {
+    console.log('Parent handleFileUploaded called with:', { fileUrl, fileName, fileSize, fileType });
+    if (fileUrl && fileName) {
+      setIdentityFileInfo({ url: fileUrl, name: fileName, size: fileSize, type: fileType });
+    } else {
+      setIdentityFileInfo(null);
+    }
   }, []);
 
   const form = useForm<CheckInForm>({
@@ -96,10 +105,6 @@ export default function CheckInPage() {
       };
       
       formData.append('data', JSON.stringify(submitData));
-      
-      if (identityFile) {
-        formData.append('identityDocument', identityFile);
-      }
 
       // Submit to internal API first
       const response = await fetch('/api/check-ins', {
@@ -117,9 +122,10 @@ export default function CheckInPage() {
       try {
         const webhookData = {
           ...submitData,
-          identityFileName: identityFile?.name || null,
-          identityFileSize: identityFile?.size || null,
-          identityFileType: identityFile?.type || null,
+          identityFileUrl: identityFileInfo?.url || null,
+          identityFileName: identityFileInfo?.name || null,
+          identityFileSize: identityFileInfo?.size || null,
+          identityFileType: identityFileInfo?.type || null,
         };
 
         console.log('Sending webhook data:', webhookData);
@@ -185,7 +191,7 @@ export default function CheckInPage() {
     console.log('Form submitted with data:', data);
     console.log('Form errors:', form.formState.errors);
     console.log('Signature data available:', !!signatureData);
-    console.log('Identity file available:', !!identityFile);
+    console.log('Identity file available:', !!identityFileInfo);
     
     if (!signatureData) {
       toast({
@@ -582,30 +588,11 @@ export default function CheckInPage() {
                   </AlertDescription>
                 </Alert>
 
-                <FileUpload
+                <CloudFileUpload
                   key="identity-file-upload"
-                  onFileChange={handleFileChange}
+                  onFileUploaded={handleFileUploaded}
                   accept=".jpg,.jpeg,.png,.pdf"
                 />
-                {identityFile && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm text-green-800">
-                        <strong>Uploaded:</strong> {identityFile.name} ({Math.round(identityFile.size / 1024)} KB)
-                      </p>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleFileChange(null)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </AccordionSection>
 
               {/* Terms of Acceptance */}
