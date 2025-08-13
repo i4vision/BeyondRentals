@@ -8,20 +8,30 @@ interface CloudFileUploadProps {
   accept: string;
   maxSize?: number;
   className?: string;
+  uploadedFile?: {
+    name: string;
+    size: number;
+    type: string;
+    url: string;
+  } | null;
 }
 
 export default function CloudFileUpload({ 
   onFileUploaded, 
   accept, 
   maxSize = 10 * 1024 * 1024,
-  className = "" 
+  className = "",
+  uploadedFile: externalUploadedFile = null
 }: CloudFileUploadProps) {
-  const [uploadedFile, setUploadedFile] = useState<{
+  const [internalUploadedFile, setInternalUploadedFile] = useState<{
     name: string;
     size: number;
     type: string;
     url: string;
   } | null>(null);
+  
+  // Use external state if provided, otherwise use internal state
+  const uploadedFile = externalUploadedFile || internalUploadedFile;
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +87,7 @@ export default function CloudFileUpload({
       };
       
       console.log('Setting uploaded file info:', fileInfo);
-      setUploadedFile(fileInfo);
+      setInternalUploadedFile(fileInfo);
       onFileUploaded(fileInfo.url, fileInfo.name, fileInfo.size, fileInfo.type);
       
     } catch (error) {
@@ -103,7 +113,7 @@ export default function CloudFileUpload({
 
   const removeFile = () => {
     console.log('Removing uploaded file');
-    setUploadedFile(null);
+    setInternalUploadedFile(null);
     onFileUploaded('', '', 0, '');
   };
 

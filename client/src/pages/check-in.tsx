@@ -592,6 +592,7 @@ export default function CheckInPage() {
                   key="identity-file-upload"
                   onFileUploaded={handleFileUploaded}
                   accept=".jpg,.jpeg,.png,.pdf"
+                  uploadedFile={identityFileInfo}
                 />
               </AccordionSection>
 
