@@ -79,11 +79,24 @@ export default function CloudFileUpload({
 
       console.log('File uploaded successfully to cloud storage');
       
+      // Convert the Google Cloud Storage URL to our app's object serving route
+      const gcsUrl = data.uploadURL.split('?')[0]; // Remove query parameters
+      const urlParts = gcsUrl.split('/');
+      const bucketIndex = urlParts.findIndex(part => part.startsWith('replit-objstore'));
+      
+      let finalUrl = gcsUrl;
+      if (bucketIndex !== -1 && urlParts[bucketIndex + 1] === '.private') {
+        // Extract the file path after .private/
+        const objectPath = urlParts.slice(bucketIndex + 2).join('/');
+        finalUrl = `/objects/${objectPath}`;
+        console.log('Converted GCS URL to app URL:', { gcsUrl, appUrl: finalUrl });
+      }
+      
       const fileInfo = {
         name: file.name,
         size: file.size,
         type: file.type,
-        url: data.uploadURL.split('?')[0], // Remove query parameters to get the clean URL
+        url: finalUrl, // Use our app's route instead of direct GCS URL
       };
       
       console.log('Setting uploaded file info:', fileInfo);
