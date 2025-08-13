@@ -126,6 +126,7 @@ export default function CheckInPage() {
           identityFileName: identityFileInfo?.name || null,
           identityFileSize: identityFileInfo?.size || null,
           identityFileType: identityFileInfo?.type || null,
+          signatureImageData: signatureData || null,
         };
 
         console.log('Sending webhook data:', webhookData);
@@ -154,6 +155,19 @@ export default function CheckInPage() {
       return result;
     },
     onSuccess: () => {
+      // Clear the form
+      form.reset();
+      
+      // Reset additional state
+      setGuests([{ firstName: "", lastName: "", phone: "", email: "" }]);
+      setSignatureData(null);
+      setIdentityFileInfo(null);
+      
+      // Reset accordion sections to initial state
+      setOpenSections({
+        "lead-guest": true,
+      });
+      
       toast({
         title: "Check-in completed successfully!",
         description: "We've received your information and will be in touch soon.",
