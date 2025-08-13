@@ -304,15 +304,14 @@ export default function CheckInPage() {
                       <Select 
                       value={form.watch("phoneCountryCode") || ""}
                       onValueChange={(value) => {
-                        const code = value.split('-')[0];
-                        form.setValue("phoneCountryCode", code);
+                        form.setValue("phoneCountryCode", value);
                       }}>
                         <SelectTrigger className="w-32 rounded-r-none enhanced-select">
                           <SelectValue placeholder="Code" />
                         </SelectTrigger>
                         <SelectContent>
                           {countryCodes.map((country, index) => (
-                            <SelectItem key={`${country.code}-${country.country}-${index}`} value={`${country.code}-${country.country}`}>
+                            <SelectItem key={`${country.code}-${country.country}-${index}`} value={country.code}>
                               {country.flag} {country.code} ({country.name})
                             </SelectItem>
                           ))}
