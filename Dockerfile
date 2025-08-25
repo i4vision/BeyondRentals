@@ -1,17 +1,9 @@
-# Use Node.js 20 Alpine as base image
-FROM node:20-alpine AS base
-
-# Install system dependencies
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-
-# Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
-RUN npm ci --only=production && npm cache clean --force
-
 # Build stage
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat
 
 # Copy package files
 COPY package.json package-lock.json* ./
@@ -22,8 +14,25 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Set environment variables for build
+ENV NODE_ENV=production
+ENV VITE_NODE_ENV=production
+
 # Build the application
 RUN npm run build
+
+# Dependencies stage
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache libc6-compat
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install only production dependencies
+RUN npm ci --only=production && npm cache clean --force
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -34,7 +43,7 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Copy the production dependencies
-COPY --from=base /app/node_modules ./node_modules
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 
