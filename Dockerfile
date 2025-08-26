@@ -21,6 +21,13 @@ ENV VITE_NODE_ENV=production
 # Build the application
 RUN npm run build
 
+# Debug: Check the build output structure
+RUN ls -la dist/
+
+# The issue is import.meta.dirname is undefined in production
+# Create a wrapper script to handle this
+RUN echo '#!/bin/sh\ncd /app && node dist/index.js' > /app/start.sh && chmod +x /app/start.sh
+
 # Dependencies stage
 FROM node:20-alpine AS deps
 WORKDIR /app
@@ -46,6 +53,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/server-start.js ./server-start.js
 
 # Create uploads directory for file storage
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
@@ -63,5 +71,5 @@ ENV PORT=5000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5000/ || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with the wrapper script
+CMD ["node", "server-start.js"]
