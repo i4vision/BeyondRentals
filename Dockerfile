@@ -14,15 +14,13 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Make build script executable
-RUN chmod +x build-and-fix.sh
-
 # Set environment variables for build
 ENV NODE_ENV=production
 ENV VITE_NODE_ENV=production
 
 # Build the application and fix import.meta.dirname issues
-RUN ./build-and-fix.sh
+# Use bash directly to avoid line ending issues
+RUN npm run build && node fix-build.js
 
 # Dependencies stage
 FROM node:20-alpine AS deps
