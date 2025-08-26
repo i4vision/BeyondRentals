@@ -28,12 +28,47 @@ content = content.replace(
   'path.resolve(process.cwd(), "dist", "public")'
 );
 
+// Fix vite imports that shouldn't be in production
+// Remove vite imports and replace them with dummy functions
+content = content.replace(
+  /import { createServer as createViteServer, createLogger } from "vite";/g,
+  '// Vite imports removed for production'
+);
+
+content = content.replace(
+  /import { defineConfig } from "vite";/g,
+  '// defineConfig import removed for production'
+);
+
+content = content.replace(
+  /import react from "@vitejs\/plugin-react";/g,
+  '// React plugin import removed for production'
+);
+
+content = content.replace(
+  /import runtimeErrorOverlay from "@replit\/vite-plugin-runtime-error-modal";/g,
+  '// Runtime error overlay import removed for production'
+);
+
+// Replace vite functions with dummy implementations
+content = content.replace(
+  /var viteLogger = createLogger\(\);/g,
+  'var viteLogger = { error: () => {} };'
+);
+
+content = content.replace(
+  /var vite_config_default = defineConfig\([^}]+\}\);/gs,
+  'var vite_config_default = {};'
+);
+
 // Write the fixed content back
 writeFileSync(buildFile, content);
 
 // Verify the fix worked
 const fixedContent = readFileSync(buildFile, 'utf8');
 const hasCorrectPath = fixedContent.includes('path2.resolve(process.cwd(), "dist", "public")');
+const noViteImports = !fixedContent.includes('from "vite"');
 console.log('✅ Path fix verified:', hasCorrectPath ? 'SUCCESS' : 'FAILED');
+console.log('✅ Vite imports removed:', noViteImports ? 'SUCCESS' : 'FAILED');
 
 console.log('✅ Fixed import.meta.dirname references in built files');
