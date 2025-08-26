@@ -12,8 +12,14 @@ console.log('Fixing import.meta.dirname in built files...');
 const buildFile = 'dist/index.js';
 let content = readFileSync(buildFile, 'utf8');
 
-// Replace all instances of import.meta.dirname with process.cwd()
-// This works because in production, the app runs from the project root
+// Replace specific path patterns for different contexts
+// For the serveStatic function, we need to point to dist directory
+content = content.replace(
+  /path2\.resolve\(process\.cwd\(\), "public"\)/g,
+  'path2.resolve(process.cwd(), "dist", "public")'
+);
+
+// Replace remaining import.meta.dirname with appropriate paths
 content = content.replace(/import\.meta\.dirname/g, 'process.cwd()');
 
 // Write the fixed content back
