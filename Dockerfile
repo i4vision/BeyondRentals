@@ -14,6 +14,9 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Make build script executable
+RUN chmod +x build-and-fix.sh
+
 # Set environment variables for build
 ENV NODE_ENV=production
 ENV VITE_NODE_ENV=production
