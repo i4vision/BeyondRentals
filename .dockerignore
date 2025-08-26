@@ -71,10 +71,11 @@ replit.nix
 
 # Development files
 .env.example
-tsconfig.json
-vite.config.ts
-tailwind.config.ts
-postcss.config.js
+# Keep build configuration files - they're needed for production build
+# tsconfig.json
+# vite.config.ts  
+# tailwind.config.ts
+# postcss.config.js
 
 # Temporary files
 tmp/

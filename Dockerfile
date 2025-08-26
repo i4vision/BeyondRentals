@@ -19,8 +19,12 @@ ENV NODE_ENV=production
 ENV VITE_NODE_ENV=production
 
 # Build the application and fix import.meta.dirname issues
-# Use bash directly to avoid line ending issues
-RUN npm run build && node fix-build.js
+# Debug the build process and handle errors gracefully
+RUN echo "Starting build process..." && \
+    npm run build && \
+    echo "Build completed, applying fixes..." && \
+    node fix-build.js && \
+    echo "All fixes applied successfully"
 
 # Dependencies stage
 FROM node:20-alpine AS deps
