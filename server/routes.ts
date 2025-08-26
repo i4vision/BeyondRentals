@@ -25,6 +25,11 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Health check endpoint
+  app.get("/health", (_req, res) => {
+    res.status(200).json({ status: "healthy", timestamp: new Date().toISOString() });
+  });
+  
   // Get upload URL for identity documents
   app.post("/api/objects/upload", async (req, res) => {
     try {

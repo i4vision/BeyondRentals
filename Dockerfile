@@ -43,6 +43,9 @@ RUN npm ci --only=production && npm cache clean --force
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -65,9 +68,9 @@ EXPOSE 5000
 ENV NODE_ENV=production
 ENV PORT=5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/ || exit 1
+# Health check using curl (more reliable than wget in Alpine)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:5000/health || exit 1
 
 # Start the application 
 CMD ["node", "dist/index.js"]
