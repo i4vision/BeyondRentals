@@ -56,10 +56,22 @@ content = content.replace(
   'var viteLogger = { error: () => {} };'
 );
 
+// Replace the entire vite config section that's causing issues
+// Find the defineConfig block and replace it with a simple object
 content = content.replace(
-  /var vite_config_default = defineConfig\([^}]+\}\);/gs,
+  /var vite_config_default = defineConfig\(\{[\s\S]*?\n\}\);/g,
   'var vite_config_default = {};'
 );
+
+// Also handle any remaining defineConfig references
+content = content.replace(/defineConfig/g, 'function(){}');
+
+// Replace react() and runtimeErrorOverlay() function calls
+content = content.replace(/react\(\)/g, 'null');
+content = content.replace(/runtimeErrorOverlay\(\)/g, 'null');
+
+// Replace createViteServer calls (only used in development anyway)
+content = content.replace(/createViteServer/g, 'function(){}');
 
 // Write the fixed content back
 writeFileSync(buildFile, content);
