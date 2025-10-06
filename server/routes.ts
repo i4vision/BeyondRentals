@@ -5,7 +5,24 @@ import path from "path";
 import { storage } from "./storage";
 import { insertCheckInSchema } from "@shared/schema";
 import { z } from "zod";
-import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { ObjectStorageService, ObjectNotFoundError as GCSObjectNotFoundError } from "./objectStorage";
+import { S3StorageService, ObjectNotFoundError as S3ObjectNotFoundError } from "./s3Storage";
+
+// Factory function to get the appropriate storage service
+function getStorageService() {
+  const storageType = process.env.STORAGE_TYPE || 'gcs';
+  
+  if (storageType === 'minio' || storageType === 's3') {
+    return new S3StorageService();
+  }
+  
+  return new ObjectStorageService();
+}
+
+// Get the correct ObjectNotFoundError based on storage type
+const ObjectNotFoundError = (process.env.STORAGE_TYPE === 'minio' || process.env.STORAGE_TYPE === 's3')
+  ? S3ObjectNotFoundError 
+  : GCSObjectNotFoundError;
 
 // Configure multer for file uploads
 const upload = multer({
@@ -33,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get upload URL for identity documents
   app.post("/api/objects/upload", async (req, res) => {
     try {
-      const objectStorageService = new ObjectStorageService();
+      const objectStorageService = getStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       res.json({ uploadURL });
     } catch (error) {
@@ -44,12 +61,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Serve private objects (identity documents)
   app.get("/objects/:objectPath(*)", async (req, res) => {
-    const objectStorageService = new ObjectStorageService();
+    const objectStorageService = getStorageService();
     try {
       const objectFile = await objectStorageService.getObjectEntityFile(
         req.path,
       );
-      objectStorageService.downloadObject(objectFile, res);
+      objectStorageService.downloadObject(objectFile as any, res);
     } catch (error) {
       console.error("Error checking object access:", error);
       if (error instanceof ObjectNotFoundError) {
