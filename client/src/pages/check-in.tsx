@@ -192,14 +192,16 @@ export default function CheckInPage() {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const addGuest = () => {
+  const handleAddGuest = (e: React.MouseEvent) => {
+    e.preventDefault();
     const currentGuests = form.getValues("guests") || [];
     const newGuests = [...currentGuests, { firstName: "", lastName: "", phone: "", email: "" }];
     setGuests(newGuests);
     form.setValue("guests", newGuests);
   };
 
-  const removeGuest = (index: number) => {
+  const handleRemoveGuest = (index: number, e: React.MouseEvent) => {
+    e.preventDefault();
     const currentGuests = form.getValues("guests") || [];
     if (currentGuests.length > 1) {
       const newGuests = currentGuests.filter((_, i) => i !== index);
@@ -207,6 +209,7 @@ export default function CheckInPage() {
       form.setValue("guests", newGuests);
     }
   };
+
 
   const onSubmit = (data: CheckInForm) => {
     console.log('Form submitted with data:', data);
@@ -510,7 +513,7 @@ export default function CheckInPage() {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeGuest(index)}
+                            onClick={(e) => handleRemoveGuest(index, e)}
                             className="text-red-500 hover:text-red-700"
                           >
                             Remove
@@ -559,7 +562,7 @@ export default function CheckInPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={addGuest}
+                  onClick={handleAddGuest}
                   className="w-full mt-4 border-dashed border-2 hover:border-red-500 hover:text-red-500"
                 >
                   Add Another Guest
