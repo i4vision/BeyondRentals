@@ -55,14 +55,23 @@ class S3FileDescriptor implements FileDescriptor {
 export class S3StorageService implements IStorageService {
   private s3Client: S3Client;
   private bucketName: string;
+  private internalEndpoint: string;
+  private publicEndpoint: string;
+  private useSSL: boolean;
 
   constructor() {
     const endpoint = process.env.MINIO_ENDPOINT || 'localhost:9000';
+    // Public endpoint is what the browser can access (e.g., localhost:5001)
+    // If not set, use the same as internal endpoint
+    const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT || endpoint;
     const accessKeyId = process.env.MINIO_ACCESS_KEY || 'minioadmin';
     const secretAccessKey = process.env.MINIO_SECRET_KEY || 'minioadmin';
     const useSSL = process.env.MINIO_USE_SSL === 'true';
     
     this.bucketName = process.env.MINIO_BUCKET || 'checkin-uploads';
+    this.internalEndpoint = endpoint;
+    this.publicEndpoint = publicEndpoint;
+    this.useSSL = useSSL;
 
     this.s3Client = new S3Client({
       endpoint: `http${useSSL ? 's' : ''}://${endpoint}`,
@@ -88,6 +97,13 @@ export class S3StorageService implements IStorageService {
     const signedUrl = await getSignedUrl(this.s3Client, command, {
       expiresIn: 900,
     });
+
+    // Replace internal endpoint with public endpoint for browser access
+    if (this.internalEndpoint !== this.publicEndpoint) {
+      const internalUrl = `http${this.useSSL ? 's' : ''}://${this.internalEndpoint}`;
+      const publicUrl = `http${this.useSSL ? 's' : ''}://${this.publicEndpoint}`;
+      return signedUrl.replace(internalUrl, publicUrl);
+    }
 
     return signedUrl;
   }
