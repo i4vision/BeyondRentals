@@ -5,11 +5,12 @@ import path from "path";
 import { storage } from "./storage";
 import { insertCheckInSchema } from "@shared/schema";
 import { z } from "zod";
-import { ObjectStorageService, ObjectNotFoundError as GCSObjectNotFoundError } from "./objectStorage";
-import { S3StorageService, ObjectNotFoundError as S3ObjectNotFoundError } from "./s3Storage";
+import { IStorageService, ObjectNotFoundError } from "./storageInterface";
+import { ObjectStorageService } from "./objectStorage";
+import { S3StorageService } from "./s3Storage";
 
 // Factory function to get the appropriate storage service
-function getStorageService() {
+function getStorageService(): IStorageService {
   const storageType = process.env.STORAGE_TYPE || 'gcs';
   
   if (storageType === 'minio' || storageType === 's3') {
@@ -18,11 +19,6 @@ function getStorageService() {
   
   return new ObjectStorageService();
 }
-
-// Get the correct ObjectNotFoundError based on storage type
-const ObjectNotFoundError = (process.env.STORAGE_TYPE === 'minio' || process.env.STORAGE_TYPE === 's3')
-  ? S3ObjectNotFoundError 
-  : GCSObjectNotFoundError;
 
 // Configure multer for file uploads
 const upload = multer({
@@ -63,10 +59,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/objects/:objectPath(*)", async (req, res) => {
     const objectStorageService = getStorageService();
     try {
-      const objectFile = await objectStorageService.getObjectEntityFile(
+      const fileDescriptor = await objectStorageService.getObjectEntityFile(
         req.path,
       );
-      objectStorageService.downloadObject(objectFile as any, res);
+      await fileDescriptor.download(res);
     } catch (error) {
       console.error("Error checking object access:", error);
       if (error instanceof ObjectNotFoundError) {

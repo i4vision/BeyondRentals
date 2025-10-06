@@ -2,16 +2,57 @@ import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from 
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Response } from "express";
 import { randomUUID } from "crypto";
+import { FileDescriptor, IStorageService, ObjectNotFoundError } from "./storageInterface";
 
-export class ObjectNotFoundError extends Error {
-  constructor() {
-    super("Object not found");
-    this.name = "ObjectNotFoundError";
-    Object.setPrototypeOf(this, ObjectNotFoundError.prototype);
+// S3 File descriptor implementing the unified interface
+class S3FileDescriptor implements FileDescriptor {
+  constructor(
+    private s3Client: S3Client,
+    private bucketName: string,
+    private key: string
+  ) {}
+
+  async download(res: Response, cacheTtlSec: number = 3600): Promise<void> {
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: this.key,
+      });
+
+      const response = await this.s3Client.send(command);
+
+      if (!response.Body) {
+        throw new Error('No file body returned');
+      }
+
+      // Set appropriate headers
+      res.set({
+        "Content-Type": response.ContentType || "application/octet-stream",
+        "Content-Length": response.ContentLength?.toString() || "",
+        "Cache-Control": `private, max-age=${cacheTtlSec}`,
+      });
+
+      // Stream the file to the response
+      const stream = response.Body as any;
+      
+      stream.on("error", (err: any) => {
+        console.error("Stream error:", err);
+        if (!res.headersSent) {
+          res.status(500).json({ error: "Error streaming file" });
+        }
+      });
+
+      stream.pipe(res);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      if (!res.headersSent) {
+        res.status(500).json({ error: "Error downloading file" });
+      }
+    }
   }
 }
 
-export class S3StorageService {
+export class S3StorageService implements IStorageService {
   private s3Client: S3Client;
   private bucketName: string;
 
@@ -51,7 +92,7 @@ export class S3StorageService {
     return signedUrl;
   }
 
-  async getObjectEntityFile(objectPath: string): Promise<{ key: string }> {
+  async getObjectEntityFile(objectPath: string): Promise<FileDescriptor> {
     if (!objectPath.startsWith("/objects/")) {
       throw new ObjectNotFoundError();
     }
@@ -71,51 +112,14 @@ export class S3StorageService {
         Key: key,
       });
       await this.s3Client.send(command);
-      return { key };
+      
+      // Return a descriptor that implements the FileDescriptor interface
+      return new S3FileDescriptor(this.s3Client, this.bucketName, key);
     } catch (error: any) {
       if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
         throw new ObjectNotFoundError();
       }
       throw error;
-    }
-  }
-
-  async downloadObject(fileInfo: { key: string }, res: Response, cacheTtlSec: number = 3600) {
-    try {
-      const command = new GetObjectCommand({
-        Bucket: this.bucketName,
-        Key: fileInfo.key,
-      });
-
-      const response = await this.s3Client.send(command);
-
-      if (!response.Body) {
-        throw new Error('No file body returned');
-      }
-
-      // Set appropriate headers
-      res.set({
-        "Content-Type": response.ContentType || "application/octet-stream",
-        "Content-Length": response.ContentLength?.toString() || "",
-        "Cache-Control": `private, max-age=${cacheTtlSec}`,
-      });
-
-      // Stream the file to the response
-      const stream = response.Body as any;
-      
-      stream.on("error", (err: any) => {
-        console.error("Stream error:", err);
-        if (!res.headersSent) {
-          res.status(500).json({ error: "Error streaming file" });
-        }
-      });
-
-      stream.pipe(res);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      if (!res.headersSent) {
-        res.status(500).json({ error: "Error downloading file" });
-      }
     }
   }
 
