@@ -64,7 +64,7 @@ services:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
     ports:
-      - "9000:9000"  # API port
+      - "5001:9000"  # API port (external:internal)
       - "9001:9001"  # Console UI port
     environment:
       - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
