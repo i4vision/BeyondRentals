@@ -465,8 +465,27 @@ export default function CheckInPage() {
                 </div>
               </AccordionSection>
 
+              {/* Proof of Identity */}
+              <AccordionSection id="identity" title="Proof of Identity" step={3}>
+                <Alert className="mb-6 border-red-200 bg-red-50">
+                  <FileText className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800">
+                    <p className="mb-2">Please upload your government issued identity document (Driver's License or Passport).</p>
+                    <p className="mb-2">Your ID is stored safely in our system and is used only for security and insurance purposes.</p>
+                    <p className="font-medium">We regret that we are unable to check in guests whose identity has not been verified and can only hand over keys to the guest whose identity document has been recorded in this agreement.</p>
+                  </AlertDescription>
+                </Alert>
+
+                <CloudFileUpload
+                  key="identity-file-upload"
+                  onFileUploaded={handleFileUploaded}
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  uploadedFile={identityFileInfo}
+                />
+              </AccordionSection>
+
               {/* Your Guests */}
-              <AccordionSection id="guests" title="Your Guests" step={3}>
+              <AccordionSection id="guests" title="Your Guests" step={4}>
                 <Alert className="mb-6 border-amber-200 bg-amber-50">
                   <Users className="h-4 w-4 text-amber-600" />
                   <AlertDescription className="text-amber-800">
@@ -538,25 +557,6 @@ export default function CheckInPage() {
                 >
                   Add Another Guest
                 </Button>
-              </AccordionSection>
-
-              {/* Proof of Identity */}
-              <AccordionSection id="identity" title="Proof of Identity" step={4}>
-                <Alert className="mb-6 border-red-200 bg-red-50">
-                  <FileText className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-800">
-                    <p className="mb-2">Please upload your government issued identity document (Driver's License or Passport).</p>
-                    <p className="mb-2">Your ID is stored safely in our system and is used only for security and insurance purposes.</p>
-                    <p className="font-medium">We regret that we are unable to check in guests whose identity has not been verified and can only hand over keys to the guest whose identity document has been recorded in this agreement.</p>
-                  </AlertDescription>
-                </Alert>
-
-                <CloudFileUpload
-                  key="identity-file-upload"
-                  onFileUploaded={handleFileUploaded}
-                  accept=".jpg,.jpeg,.png,.pdf"
-                  uploadedFile={identityFileInfo}
-                />
               </AccordionSection>
 
               {/* Terms of Acceptance */}
