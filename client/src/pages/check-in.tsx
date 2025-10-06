@@ -86,6 +86,8 @@ export default function CheckInPage() {
     defaultValues: {
       guests: [{ firstName: "", lastName: "", phone: "", email: "" }],
       termsAccepted: false,
+      arrivalTime: "15:00",
+      departureTime: "09:00",
     },
   });
 
