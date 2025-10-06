@@ -287,8 +287,8 @@ export default function CheckInPage() {
           <Card className="bg-white rounded-xl shadow-sm border">
             <CardContent className="p-0">
               
-              {/* Lead Guest Details */}
-              <AccordionSection id="lead-guest" title="Lead Guest Details" step={1}>
+              {/* Guest Details */}
+              <AccordionSection id="lead-guest" title="Guest Details" step={1}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="firstName">First Name *</Label>
@@ -390,42 +390,6 @@ export default function CheckInPage() {
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.country.message}</p>
                     )}
                   </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="address">Street Address *</Label>
-                    <Input
-                      id="address"
-                      {...form.register("address")}
-                      placeholder="123 Main Street, Apt 4B"
-                      className="mt-2 enhanced-input"
-                    />
-                    {form.formState.errors.address && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.address.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      {...form.register("city")}
-                      placeholder="Enter city"
-                      className="mt-2 enhanced-input"
-                    />
-                    {form.formState.errors.city && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.city.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="postalCode">Postal Code *</Label>
-                    <Input
-                      id="postalCode"
-                      {...form.register("postalCode")}
-                      placeholder="12345"
-                      className="mt-2 enhanced-input"
-                    />
-                    {form.formState.errors.postalCode && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.postalCode.message}</p>
-                    )}
-                  </div>
                 </div>
               </AccordionSection>
 
@@ -466,26 +430,6 @@ export default function CheckInPage() {
                     />
                     {form.formState.errors.arrivalTime && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.arrivalTime.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="travelingBy">Traveling By *</Label>
-                    <Select 
-                      value={form.watch("travelingBy") || ""}
-                      onValueChange={(value) => form.setValue("travelingBy", value)}>
-                      <SelectTrigger className="mt-2 enhanced-select">
-                        <SelectValue placeholder="Select transportation method" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {transportationMethods.map((method) => (
-                          <SelectItem key={method.value} value={method.value}>
-                            {method.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {form.formState.errors.travelingBy && (
-                      <p className="text-red-500 text-sm mt-1">{form.formState.errors.travelingBy.message}</p>
                     )}
                   </div>
                   <div>
