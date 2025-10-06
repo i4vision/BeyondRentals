@@ -199,6 +199,7 @@ export default function CloudFileUpload({
               </div>
             </div>
             <Button 
+              type="button"
               variant="ghost" 
               size="sm"
               onClick={removeFile}
