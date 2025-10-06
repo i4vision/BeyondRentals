@@ -56,23 +56,23 @@ export class S3StorageService implements IStorageService {
   private s3Client: S3Client;
   private bucketName: string;
   private internalEndpoint: string;
-  private publicEndpoint: string;
+  private accessKeyId: string;
+  private secretAccessKey: string;
   private useSSL: boolean;
 
   constructor() {
     const endpoint = process.env.MINIO_ENDPOINT || 'localhost:9000';
-    // Public endpoint is what the browser can access (e.g., localhost:5001)
-    // If not set, use the same as internal endpoint
-    const publicEndpoint = process.env.MINIO_PUBLIC_ENDPOINT || endpoint;
     const accessKeyId = process.env.MINIO_ACCESS_KEY || 'minioadmin';
     const secretAccessKey = process.env.MINIO_SECRET_KEY || 'minioadmin';
     const useSSL = process.env.MINIO_USE_SSL === 'true';
     
     this.bucketName = process.env.MINIO_BUCKET || 'checkin-uploads';
     this.internalEndpoint = endpoint;
-    this.publicEndpoint = publicEndpoint;
+    this.accessKeyId = accessKeyId;
+    this.secretAccessKey = secretAccessKey;
     this.useSSL = useSSL;
 
+    // Client for internal operations (downloading)
     this.s3Client = new S3Client({
       endpoint: `http${useSSL ? 's' : ''}://${endpoint}`,
       region: 'us-east-1', // MinIO doesn't use regions but SDK requires it
@@ -88,34 +88,37 @@ export class S3StorageService implements IStorageService {
     const objectId = randomUUID();
     const key = `uploads/${objectId}`;
 
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-    });
-
-    // Generate presigned URL for PUT operation (15 minutes expiry)
-    const signedUrl = await getSignedUrl(this.s3Client, command, {
-      expiresIn: 900,
-    });
-
-    // Determine the public endpoint to use
-    let finalPublicEndpoint = this.publicEndpoint;
+    // Determine the public endpoint to use for signing
+    let signingEndpoint = this.internalEndpoint;
     
     // If we have a request host, use it with the MinIO port (5001)
     if (requestHost) {
       const hostParts = requestHost.split(':');
       const hostname = hostParts[0];
-      // Use port 5001 for MinIO (or from env if different)
       const minioPort = process.env.MINIO_PUBLIC_PORT || '5001';
-      finalPublicEndpoint = `${hostname}:${minioPort}`;
+      signingEndpoint = `${hostname}:${minioPort}`;
     }
 
-    // Replace internal endpoint with public endpoint for browser access
-    if (this.internalEndpoint !== finalPublicEndpoint) {
-      const internalUrl = `http${this.useSSL ? 's' : ''}://${this.internalEndpoint}`;
-      const publicUrl = `http${this.useSSL ? 's' : ''}://${finalPublicEndpoint}`;
-      return signedUrl.replace(internalUrl, publicUrl);
-    }
+    // Create a separate S3 client with the public endpoint for signing
+    const signingClient = new S3Client({
+      endpoint: `http${this.useSSL ? 's' : ''}://${signingEndpoint}`,
+      region: 'us-east-1',
+      credentials: {
+        accessKeyId: this.accessKeyId,
+        secretAccessKey: this.secretAccessKey,
+      },
+      forcePathStyle: true,
+    });
+
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    // Generate presigned URL with the public endpoint
+    const signedUrl = await getSignedUrl(signingClient, command, {
+      expiresIn: 900,
+    });
 
     return signedUrl;
   }
