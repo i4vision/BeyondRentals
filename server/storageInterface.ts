@@ -7,7 +7,7 @@ export interface FileDescriptor {
 
 // Base storage service interface
 export interface IStorageService {
-  getObjectEntityUploadURL(): Promise<string>;
+  getObjectEntityUploadURL(requestHost?: string): Promise<string>;
   getObjectEntityFile(objectPath: string): Promise<FileDescriptor>;
   normalizeObjectEntityPath(rawPath: string): string;
   canAccessObjectEntity(): Promise<boolean>;

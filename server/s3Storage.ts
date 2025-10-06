@@ -84,7 +84,7 @@ export class S3StorageService implements IStorageService {
     });
   }
 
-  async getObjectEntityUploadURL(): Promise<string> {
+  async getObjectEntityUploadURL(requestHost?: string): Promise<string> {
     const objectId = randomUUID();
     const key = `uploads/${objectId}`;
 
@@ -98,10 +98,22 @@ export class S3StorageService implements IStorageService {
       expiresIn: 900,
     });
 
+    // Determine the public endpoint to use
+    let finalPublicEndpoint = this.publicEndpoint;
+    
+    // If we have a request host, use it with the MinIO port (5001)
+    if (requestHost) {
+      const hostParts = requestHost.split(':');
+      const hostname = hostParts[0];
+      // Use port 5001 for MinIO (or from env if different)
+      const minioPort = process.env.MINIO_PUBLIC_PORT || '5001';
+      finalPublicEndpoint = `${hostname}:${minioPort}`;
+    }
+
     // Replace internal endpoint with public endpoint for browser access
-    if (this.internalEndpoint !== this.publicEndpoint) {
+    if (this.internalEndpoint !== finalPublicEndpoint) {
       const internalUrl = `http${this.useSSL ? 's' : ''}://${this.internalEndpoint}`;
-      const publicUrl = `http${this.useSSL ? 's' : ''}://${this.publicEndpoint}`;
+      const publicUrl = `http${this.useSSL ? 's' : ''}://${finalPublicEndpoint}`;
       return signedUrl.replace(internalUrl, publicUrl);
     }
 

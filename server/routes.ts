@@ -47,7 +47,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/objects/upload", async (req, res) => {
     try {
       const objectStorageService = getStorageService();
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      // Pass the request host so MinIO URLs use the correct hostname/IP
+      const requestHost = req.get('host');
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL(requestHost);
       res.json({ uploadURL });
     } catch (error) {
       console.error("Error getting upload URL:", error);

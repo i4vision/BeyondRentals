@@ -85,7 +85,7 @@ export default function CloudFileUpload({
       let finalUrl = storageUrl;
       
       // Handle GCS URLs (replit-objstore bucket)
-      const gcsIndex = urlParts.findIndex(part => part.startsWith('replit-objstore'));
+      const gcsIndex = urlParts.findIndex((part: string) => part.startsWith('replit-objstore'));
       if (gcsIndex !== -1 && urlParts[gcsIndex + 1] === '.private') {
         const objectPath = urlParts.slice(gcsIndex + 2).join('/');
         finalUrl = `/objects/${objectPath}`;
