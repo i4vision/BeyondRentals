@@ -18,7 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import SignaturePadPersistent from "@/components/signature-pad-persistent";
 import CloudFileUpload from "@/components/cloud-file-upload";
-import { countryCodes, countries, transportationMethods } from "@shared/schema";
+import { countryCodes, countries } from "@shared/schema";
 
 const guestSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -28,22 +28,18 @@ const guestSchema = z.object({
 });
 
 const checkInSchema = z.object({
-  // Lead guest details
+  // Guest details
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone number is required"),
   phoneCountryCode: z.string().min(1, "Country code is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
-  address: z.string().min(1, "Address is required"),
-  city: z.string().min(1, "City is required"),
-  postalCode: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
   
   // Arrival & departure
   arrivalDate: z.string().min(1, "Arrival date is required"),
   arrivalTime: z.string().min(1, "Arrival time is required"),
-  travelingBy: z.string().min(1, "Transportation method is required"),
   arrivalNotes: z.string().optional(),
   departureDate: z.string().min(1, "Departure date is required"),
   departureTime: z.string().min(1, "Departure time is required"),
