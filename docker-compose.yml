@@ -12,10 +12,13 @@ services:
       - NODE_ENV=production
       - PORT=5000
       - DATABASE_URL=postgresql://checkin_user:checkin_password@postgres:5432/checkin_db
-      # Object storage environment variables (update these with your actual values)
-      - DEFAULT_OBJECT_STORAGE_BUCKET_ID=${DEFAULT_OBJECT_STORAGE_BUCKET_ID:-your-bucket-id}
-      - PRIVATE_OBJECT_DIR=${PRIVATE_OBJECT_DIR:-/your-bucket/private}
-      - PUBLIC_OBJECT_SEARCH_PATHS=${PUBLIC_OBJECT_SEARCH_PATHS:-/your-bucket/public}
+      # MinIO S3-compatible object storage
+      - STORAGE_TYPE=minio
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_BUCKET=${MINIO_BUCKET:-checkin-uploads}
+      - MINIO_USE_SSL=false
       # Session secret
       - SESSION_SECRET=${SESSION_SECRET:-your-super-secret-session-key-change-this-in-production}
     volumes:
@@ -25,6 +28,8 @@ services:
       - ./logs:/app/logs
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -54,20 +59,47 @@ services:
     networks:
       - checkin-network
 
-  # Optional: Redis for session storage (uncomment if needed)
-  # redis:
-  #   image: redis:7-alpine
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis_data:/data
-  #   restart: unless-stopped
-  #   networks:
-  #     - checkin-network
+  # MinIO S3-compatible object storage
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"  # API port
+      - "9001:9001"  # Console UI port
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - checkin-network
+
+  # MinIO bucket creation service (runs once to create bucket)
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ACCESS_KEY:-minioadmin} ${MINIO_SECRET_KEY:-minioadmin};
+      /usr/bin/mc mb myminio/${MINIO_BUCKET:-checkin-uploads} --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/${MINIO_BUCKET:-checkin-uploads};
+      exit 0;
+      "
+    networks:
+      - checkin-network
 
 volumes:
   postgres_data:
-  # redis_data:
+  minio_data:
 
 networks:
   checkin-network:
