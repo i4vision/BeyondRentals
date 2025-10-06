@@ -8,6 +8,19 @@ This is a full-stack web application for managing guest check-ins at hospitality
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (October 2025)
+
+### Containerized Deployment with MinIO Integration (October 6, 2025)
+- Implemented unified storage interface (IStorageService) supporting both Google Cloud Storage and MinIO
+- Created FileDescriptor pattern for type-safe file download operations across storage backends
+- Added S3StorageService for MinIO/S3-compatible object storage in containerized deployments
+- Updated ObjectStorageService to implement unified interface with GCSFileDescriptor wrapper
+- Factory pattern in routes.ts switches storage backend based on STORAGE_TYPE environment variable
+- MinIO service configured in docker-compose.yml with health checks and automatic bucket creation
+- Removed all type casts - fully type-safe storage abstraction throughout the application
+- AWS SDK (@aws-sdk/client-s3, @aws-sdk/s3-request-presigner) installed for S3-compatible operations
+- Environment configuration supports both Replit (GCS) and containerized (MinIO) deployments
+
 ## Recent Changes (August 2025)
 
 ### Country Code and Selection Improvements
@@ -39,6 +52,7 @@ Preferred communication style: Simple, everyday language.
 - **Language**: TypeScript with ES modules
 - **File Uploads**: Multer middleware for handling multipart/form-data with file type validation and size limits
 - **Data Storage**: In-memory storage implementation with interface for future database integration
+- **Object Storage**: Unified storage interface supporting Google Cloud Storage (Replit) and MinIO (containers)
 - **API Design**: RESTful endpoints with JSON responses and proper error handling
 
 ### Form Management
@@ -76,9 +90,12 @@ Preferred communication style: Simple, everyday language.
 - **TanStack React Query**: Async state management for server data
 - **Wouter**: Minimalist routing library for React applications
 
-### File Handling
+### File Handling and Object Storage
 - **Multer**: Express middleware for handling file uploads
 - **File System**: Node.js fs module for file operations
+- **Google Cloud Storage**: Google Cloud Storage SDK for Replit-hosted object storage
+- **AWS S3 SDK**: AWS SDK for S3-compatible operations with MinIO in containerized deployments
+- **MinIO**: Self-hosted S3-compatible object storage for Docker/container deployments
 
 ### Database (Configured)
 - **Drizzle ORM**: Type-safe ORM with PostgreSQL support
@@ -90,3 +107,10 @@ Preferred communication style: Simple, everyday language.
 - **TypeScript**: Static type checking and enhanced developer experience
 - **PostCSS**: CSS processing with Autoprefixer for browser compatibility
 - **ESBuild**: Fast JavaScript bundler for production builds
+
+### Containerization and Deployment
+- **Docker**: Multi-stage Dockerfile for optimized production builds
+- **Docker Compose**: Orchestrates application and MinIO services
+- **MinIO**: S3-compatible object storage service for containerized deployments
+- **Health Checks**: Built-in health monitoring for container orchestration (Portainer, Kubernetes)
+- **Storage Abstraction**: Factory pattern switches between GCS (Replit) and MinIO (containers) based on STORAGE_TYPE env var
