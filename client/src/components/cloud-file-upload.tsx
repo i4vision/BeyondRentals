@@ -65,12 +65,11 @@ export default function CloudFileUpload({
       console.log('Got upload URL:', data.uploadURL);
       
       // Upload file directly to cloud storage
+      // Note: Don't include Content-Type header for S3/MinIO presigned URLs
+      // as it must be part of the signature. The storage service will detect it automatically.
       const uploadResponse = await fetch(data.uploadURL, {
         method: 'PUT',
         body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
       });
 
       if (!uploadResponse.ok) {
@@ -79,17 +78,27 @@ export default function CloudFileUpload({
 
       console.log('File uploaded successfully to cloud storage');
       
-      // Convert the Google Cloud Storage URL to our app's object serving route
-      const gcsUrl = data.uploadURL.split('?')[0]; // Remove query parameters
-      const urlParts = gcsUrl.split('/');
-      const bucketIndex = urlParts.findIndex(part => part.startsWith('replit-objstore'));
+      // Convert the storage URL to our app's object serving route
+      const storageUrl = data.uploadURL.split('?')[0]; // Remove query parameters
+      const urlParts = storageUrl.split('/');
       
-      let finalUrl = gcsUrl;
-      if (bucketIndex !== -1 && urlParts[bucketIndex + 1] === '.private') {
-        // Extract the file path after .private/
-        const objectPath = urlParts.slice(bucketIndex + 2).join('/');
+      let finalUrl = storageUrl;
+      
+      // Handle GCS URLs (replit-objstore bucket)
+      const gcsIndex = urlParts.findIndex(part => part.startsWith('replit-objstore'));
+      if (gcsIndex !== -1 && urlParts[gcsIndex + 1] === '.private') {
+        const objectPath = urlParts.slice(gcsIndex + 2).join('/');
         finalUrl = `/objects/${objectPath}`;
-        console.log('Converted GCS URL to app URL:', { gcsUrl, appUrl: finalUrl });
+        console.log('Converted GCS URL to app URL:', { storageUrl, appUrl: finalUrl });
+      } 
+      // Handle MinIO/S3 URLs (uploads/ prefix)
+      else {
+        const uploadsIndex = urlParts.indexOf('uploads');
+        if (uploadsIndex !== -1 && urlParts.length > uploadsIndex + 1) {
+          const objectPath = urlParts.slice(uploadsIndex + 1).join('/');
+          finalUrl = `/objects/${objectPath}`;
+          console.log('Converted MinIO URL to app URL:', { storageUrl, appUrl: finalUrl });
+        }
       }
       
       const fileInfo = {
