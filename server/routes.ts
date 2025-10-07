@@ -162,25 +162,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { token } = req.body;
       
       if (!token) {
+        console.log('[Token Verify] Missing token in request');
         return res.status(400).json({ message: "Token is required" });
       }
       
       // Split token into data and signature
       const parts = token.split('.');
       if (parts.length !== 2) {
+        console.log('[Token Verify] Invalid token format - expected 2 parts, got:', parts.length);
         return res.status(400).json({ message: "Invalid token format" });
       }
       
       const [dataToken, signature] = parts;
+      console.log('[Token Verify] Data token (first 20 chars):', dataToken.substring(0, 20) + '...');
+      console.log('[Token Verify] Signature (first 20 chars):', signature.substring(0, 20) + '...');
       
       // Verify signature
-      if (!verifyToken(dataToken, signature)) {
+      const isValid = verifyToken(dataToken, signature);
+      console.log('[Token Verify] Signature valid:', isValid);
+      
+      if (!isValid) {
+        console.log('[Token Verify] REJECTED - Invalid signature');
         return res.status(400).json({ message: "Invalid token signature" });
       }
       
       // Decode data
       const jsonString = Buffer.from(dataToken, 'base64url').toString('utf8');
       const data = JSON.parse(jsonString);
+      console.log('[Token Verify] ACCEPTED - Data:', JSON.stringify(data).substring(0, 100) + '...');
       
       res.json({ data, verified: true });
     } catch (error) {
