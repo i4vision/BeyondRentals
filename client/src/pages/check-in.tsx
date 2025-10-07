@@ -61,6 +61,41 @@ export default function CheckInPage() {
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   
+  // Debug scroll behavior
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      console.log('SCROLL EVENT DETECTED:', {
+        scrollY: window.scrollY,
+        target: e.target,
+        type: e.type
+      });
+      if (window.scrollY === 0) {
+        console.trace('Scrolled to top - stack trace above');
+      }
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      console.log('CLICK EVENT:', {
+        tag: target.tagName,
+        type: target.getAttribute('type'),
+        role: target.getAttribute('role'),
+        scrollBefore: window.scrollY
+      });
+      
+      setTimeout(() => {
+        console.log('Scroll after click:', window.scrollY);
+      }, 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('click', handleClick, true);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('click', handleClick, true);
+    };
+  }, []);
   
   const handleSignatureChange = useCallback((signature: string | null) => {
     console.log('Parent handleSignatureChange called with signature length:', signature?.length || 0);
