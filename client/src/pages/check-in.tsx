@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -60,6 +60,22 @@ export default function CheckInPage() {
   });
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
+  
+  // Prevent scroll-to-top behavior
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      if (window.scrollY === 0 && e.target !== document) {
+        // Prevent programmatic scrolls to top
+        window.scrollTo(0, window.pageYOffset || document.documentElement.scrollTop);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { capture: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll, { capture: true });
+    };
+  }, []);
   
   const handleSignatureChange = useCallback((signature: string | null) => {
     console.log('Parent handleSignatureChange called with signature length:', signature?.length || 0);
@@ -289,15 +305,7 @@ export default function CheckInPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <form 
-          onSubmit={form.handleSubmit(onSubmit)}
-          onSubmitCapture={(e) => {
-            console.log('Form submit captured!', {
-              submitter: e.nativeEvent.submitter,
-              submitterHTML: (e.nativeEvent.submitter as HTMLElement)?.outerHTML
-            });
-          }}
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card className="bg-white rounded-xl shadow-sm border">
             <CardContent className="p-0">
               
