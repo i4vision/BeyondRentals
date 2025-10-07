@@ -1,0 +1,40 @@
+Warning: Encountered two children with the same key, `+1`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at select
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-EVLBUYTV.js?v=e25d844c:79:13
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-EVLBUYTV.js?v=e25d844c:56:13
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BOL2CCOG.js?v=e25d844c:42:13
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-ZCJJSHUN.js?v=e25d844c:289:20
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=e25d844c:2205:13
+    at Provider (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WCYSSMAY.js?v=e25d844c:32:15)
+    at Provider (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WCYSSMAY.js?v=e25d844c:32:15)
+    at Popper (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-23TXSS6A.js?v=e25d844c:1919:11)
+    at Select (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-select.js?v=e25d844c:1162:5)
+    at div
+    at div
+    at div
+    at div
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BOL2CCOG.js?v=e25d844c:42:13
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-collapsible.js?v=e25d844c:106:11
+    at Presence (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4HHZTOXW.js?v=e25d844c:24:11)
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-collapsible.js?v=e25d844c:99:13
+    at div
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-BOL2CCOG.js?v=e25d844c:42:13
+    at Provider (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WCYSSMAY.js?v=e25d844c:32:15)
+    at https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-collapsible.js?v=e25d844c:40:7
+    at div
+    at AccordionSection (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/src/pages/check-in.tsx:211:5)
+    at div
+    at _c9 (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/src/components/ui/card.tsx:20:11)
+    at form
+    at main
+    at div
+    at CheckInPage (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/src/pages/check-in.tsx:65:21)
+    at Route (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e25d844c:323:16)
+    at Switch (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=e25d844c:379:17)
+    at Router
+    at Provider (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-WCYSSMAY.js?v=e25d844c:32:15)
+    at TooltipProvider (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=e25d844c:57:5)
+    at QueryClientProvider (https://cb5b78fc-586f-44d9-95ce-e044a4118f0f-00-1qc5vo26v98gn.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=e25d844c:2805:3)
+    at App
