@@ -61,29 +61,6 @@ export default function CheckInPage() {
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   
-  // Prevent unwanted scroll-to-top behavior
-  useEffect(() => {
-    let scrollPosition = 0;
-    
-    const captureScroll = () => {
-      scrollPosition = window.pageYOffset;
-    };
-    
-    const preventUnwantedScroll = () => {
-      // If scroll position suddenly changed to 0, restore it
-      if (window.pageYOffset === 0 && scrollPosition > 50) {
-        window.scrollTo(0, scrollPosition);
-      }
-    };
-    
-    window.addEventListener('scroll', captureScroll);
-    const interval = setInterval(preventUnwantedScroll, 50);
-    
-    return () => {
-      window.removeEventListener('scroll', captureScroll);
-      clearInterval(interval);
-    };
-  }, []);
   
   const handleSignatureChange = useCallback((signature: string | null) => {
     console.log('Parent handleSignatureChange called with signature length:', signature?.length || 0);
@@ -371,7 +348,7 @@ export default function CheckInPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {countryCodes.map((country) => (
-                            <SelectItem key={country.country} value={country.code}>
+                            <SelectItem key={`${country.country}-${country.name}`} value={country.code}>
                               {country.flag} {country.code} ({country.name})
                             </SelectItem>
                           ))}
