@@ -289,7 +289,15 @@ export default function CheckInPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form 
+          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmitCapture={(e) => {
+            console.log('Form submit captured!', {
+              submitter: e.nativeEvent.submitter,
+              submitterHTML: (e.nativeEvent.submitter as HTMLElement)?.outerHTML
+            });
+          }}
+        >
           <Card className="bg-white rounded-xl shadow-sm border">
             <CardContent className="p-0">
               
