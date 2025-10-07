@@ -61,6 +61,30 @@ export default function CheckInPage() {
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   
+  // Prevent unwanted scroll-to-top behavior
+  useEffect(() => {
+    let scrollPosition = 0;
+    
+    const captureScroll = () => {
+      scrollPosition = window.pageYOffset;
+    };
+    
+    const preventUnwantedScroll = () => {
+      // If scroll position suddenly changed to 0, restore it
+      if (window.pageYOffset === 0 && scrollPosition > 50) {
+        window.scrollTo(0, scrollPosition);
+      }
+    };
+    
+    window.addEventListener('scroll', captureScroll);
+    const interval = setInterval(preventUnwantedScroll, 50);
+    
+    return () => {
+      window.removeEventListener('scroll', captureScroll);
+      clearInterval(interval);
+    };
+  }, []);
+  
   const handleSignatureChange = useCallback((signature: string | null) => {
     console.log('Parent handleSignatureChange called with signature length:', signature?.length || 0);
     setSignatureData(signature);
@@ -271,7 +295,7 @@ export default function CheckInPage() {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen" style={{ overflow: 'auto' }}>
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 py-6">
@@ -290,7 +314,7 @@ export default function CheckInPage() {
 
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} style={{ position: 'relative' }}>
           <Card className="bg-white rounded-xl shadow-sm border">
             <CardContent className="p-0">
               
