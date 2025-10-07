@@ -60,6 +60,23 @@ export default function CheckInPage() {
   });
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
+  const [identityFileInfo, setIdentityFileInfo] = useState<{
+    url: string;
+    name: string;
+    size: number;
+    type: string;
+  } | null>(null);
+
+  const form = useForm<CheckInForm>({
+    resolver: zodResolver(checkInSchema),
+    defaultValues: {
+      guests: [{ firstName: "", lastName: "", phone: "", email: "" }],
+      termsAccepted: false,
+      arrivalTime: "15:00",
+      departureTime: "09:00",
+    },
+    shouldFocusError: false,
+  });
   
   // Parse URL parameters for pre-fill functionality
   useEffect(() => {
@@ -198,12 +215,6 @@ export default function CheckInPage() {
     console.log('Parent handleSignatureChange called with signature length:', signature?.length || 0);
     setSignatureData(signature);
   }, []);
-  const [identityFileInfo, setIdentityFileInfo] = useState<{
-    url: string;
-    name: string;
-    size: number;
-    type: string;
-  } | null>(null);
   
   const handleFileUploaded = useCallback((fileUrl: string, fileName: string, fileSize: number, fileType: string) => {
     console.log('Parent handleFileUploaded called with:', { fileUrl, fileName, fileSize, fileType });
@@ -213,17 +224,6 @@ export default function CheckInPage() {
       setIdentityFileInfo(null);
     }
   }, []);
-
-  const form = useForm<CheckInForm>({
-    resolver: zodResolver(checkInSchema),
-    defaultValues: {
-      guests: [{ firstName: "", lastName: "", phone: "", email: "" }],
-      termsAccepted: false,
-      arrivalTime: "15:00",
-      departureTime: "09:00",
-    },
-    shouldFocusError: false, // Prevent auto-focus on validation errors
-  });
 
   const mutation = useMutation({
     mutationFn: async (data: CheckInForm) => {
