@@ -471,16 +471,23 @@ export default function CheckInPage() {
                     <Label>Phone Number *</Label>
                     <div className="flex mt-2">
                       <Select 
-                      value={form.watch("phoneCountryCode") || ""}
+                      value={(() => {
+                        const code = form.watch("phoneCountryCode") || "";
+                        // Find the first matching country for this code to create a unique value
+                        const country = countryCodes.find(c => c.code === code);
+                        return country ? `${code}-${country.country}` : code;
+                      })()}
                       onValueChange={(value) => {
-                        form.setValue("phoneCountryCode", value);
+                        // Extract just the code part (before the dash)
+                        const code = value.split('-')[0];
+                        form.setValue("phoneCountryCode", code);
                       }}>
                         <SelectTrigger className="w-32 rounded-r-none enhanced-select">
                           <SelectValue placeholder="Code" />
                         </SelectTrigger>
                         <SelectContent>
                           {countryCodes.map((country) => (
-                            <SelectItem key={`${country.country}-${country.name}`} value={country.code}>
+                            <SelectItem key={`${country.country}-${country.code}`} value={`${country.code}-${country.country}`}>
                               {country.flag} {country.code} ({country.name})
                             </SelectItem>
                           ))}
