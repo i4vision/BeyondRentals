@@ -61,39 +61,30 @@ export default function CheckInPage() {
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   
-  // Debug scroll behavior
+  // Prevent unwanted scroll behavior
   useEffect(() => {
-    const handleScroll = (e: Event) => {
-      console.log('SCROLL EVENT DETECTED:', {
-        scrollY: window.scrollY,
-        target: e.target,
-        type: e.type
-      });
-      if (window.scrollY === 0) {
-        console.trace('Scrolled to top - stack trace above');
-      }
-    };
-
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      console.log('CLICK EVENT:', {
-        tag: target.tagName,
-        type: target.getAttribute('type'),
-        role: target.getAttribute('role'),
-        scrollBefore: window.scrollY
-      });
+    let currentScroll = window.scrollY;
+    
+    const preventScrollToTop = () => {
+      const newScroll = window.scrollY;
       
-      setTimeout(() => {
-        console.log('Scroll after click:', window.scrollY);
-      }, 100);
+      // If we suddenly jumped to top (scroll went from >100 to 0), restore position
+      if (currentScroll > 100 && newScroll === 0) {
+        console.log('Prevented scroll to top, restoring to:', currentScroll);
+        window.scrollTo({ top: currentScroll, behavior: 'instant' });
+        return;
+      }
+      
+      currentScroll = newScroll;
     };
 
-    window.addEventListener('scroll', handleScroll);
-    document.addEventListener('click', handleClick, true);
+    // Check scroll position very frequently
+    const interval = setInterval(preventScrollToTop, 10);
+    window.addEventListener('scroll', preventScrollToTop);
     
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('click', handleClick, true);
+      clearInterval(interval);
+      window.removeEventListener('scroll', preventScrollToTop);
     };
   }, []);
   
@@ -626,12 +617,20 @@ export default function CheckInPage() {
                   <Checkbox
                     id="terms"
                     checked={form.watch("termsAccepted")}
-                    onCheckedChange={(checked) => form.setValue("termsAccepted", checked as boolean)}
+                    onCheckedChange={(checked) => {
+                      form.setValue("termsAccepted", checked as boolean);
+                    }}
                   />
-                  <Label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed">
+                  <label 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      form.setValue("termsAccepted", !form.watch("termsAccepted"));
+                    }}
+                    className="text-sm text-gray-700 leading-relaxed cursor-pointer"
+                  >
                     By signing this agreement, you acknowledge that you have read and agree to the{" "}
-                    <span className="text-red-500 hover:underline cursor-pointer">Rental Agreement</span>.
-                  </Label>
+                    <span className="text-red-500 hover:underline">Rental Agreement</span>.
+                  </label>
                 </div>
                 {form.formState.errors.termsAccepted && (
                   <p className="text-red-500 text-sm mt-2">{form.formState.errors.termsAccepted.message}</p>
