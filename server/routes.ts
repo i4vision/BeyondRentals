@@ -2,6 +2,7 @@ import type { Express, Request } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import path from "path";
+import crypto from "crypto";
 import { storage } from "./storage";
 import { insertCheckInSchema } from "@shared/schema";
 import { z } from "zod";
@@ -18,6 +19,40 @@ function getStorageService(): IStorageService {
   }
   
   return new ObjectStorageService();
+}
+
+// Token signing utilities
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
+
+if (!TOKEN_SECRET) {
+  console.error('ERROR: TOKEN_SECRET environment variable is not set. Pre-fill URL generation will not work.');
+}
+
+function signToken(data: string): string {
+  if (!TOKEN_SECRET) {
+    throw new Error('TOKEN_SECRET is not configured');
+  }
+  const hmac = crypto.createHmac('sha256', TOKEN_SECRET);
+  hmac.update(data);
+  return hmac.digest('base64url');
+}
+
+function verifyToken(data: string, signature: string): boolean {
+  try {
+    const expectedSignature = signToken(data);
+    const signatureBuffer = Buffer.from(signature, 'base64url');
+    const expectedBuffer = Buffer.from(expectedSignature, 'base64url');
+    
+    // Check length first to avoid RangeError in timingSafeEqual
+    if (signatureBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+    
+    return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return false;
+  }
 }
 
 // Configure multer for file uploads
@@ -118,6 +153,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(checkIn);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Verify and decode pre-fill token
+  app.post("/api/verify-prefill-token", async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+      
+      // Split token into data and signature
+      const parts = token.split('.');
+      if (parts.length !== 2) {
+        return res.status(400).json({ message: "Invalid token format" });
+      }
+      
+      const [dataToken, signature] = parts;
+      
+      // Verify signature
+      if (!verifyToken(dataToken, signature)) {
+        return res.status(400).json({ message: "Invalid token signature" });
+      }
+      
+      // Decode data
+      const jsonString = Buffer.from(dataToken, 'base64url').toString('utf8');
+      const data = JSON.parse(jsonString);
+      
+      res.json({ data, verified: true });
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      res.status(500).json({ message: "Failed to verify token" });
+    }
+  });
+
+  // Generate pre-filled check-in URL
+  app.post("/api/generate-prefill-url", async (req, res) => {
+    try {
+      const guestData = req.body;
+      
+      // Define whitelisted scalar fields that can be pre-filled
+      const allowedFields = [
+        'firstName', 'lastName', 'email', 'phone', 'phoneCountryCode',
+        'dateOfBirth', 'country', 'arrivalDate', 'arrivalTime', 
+        'departureDate', 'departureTime', 'arrivalNotes'
+      ];
+      
+      // Filter and validate the data to only include allowed scalar fields
+      const sanitizedData: Record<string, string> = {};
+      for (const field of allowedFields) {
+        if (guestData[field] !== undefined && guestData[field] !== null) {
+          sanitizedData[field] = String(guestData[field]);
+        }
+      }
+      
+      // Get the base URL from the request
+      const protocol = req.protocol;
+      const host = req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+      
+      // Option 1: Generate URL with signed token (compact) with proper UTF-8 encoding
+      const jsonString = JSON.stringify(sanitizedData);
+      const dataToken = Buffer.from(jsonString, 'utf8').toString('base64url');
+      const signature = signToken(dataToken);
+      const signedToken = `${dataToken}.${signature}`;
+      const tokenUrl = `${baseUrl}/?token=${encodeURIComponent(signedToken)}`;
+      
+      // Option 2: Generate URL with query parameters (readable, unsigned)
+      const params = new URLSearchParams(sanitizedData);
+      const queryUrl = `${baseUrl}/?${params.toString()}`;
+      
+      res.json({
+        tokenUrl,
+        queryUrl,
+        sanitizedData
+      });
+    } catch (error) {
+      console.error("Error generating pre-fill URL:", error);
+      res.status(500).json({ message: "Failed to generate pre-fill URL" });
     }
   });
 

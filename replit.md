@@ -10,6 +10,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 2025)
 
+### URL-Based Form Pre-fill Functionality (October 7, 2025)
+- Implemented secure pre-filled form links to send personalized check-in forms to guests
+- Three methods supported: signed tokens (secure), unsigned tokens (legacy), and query parameters
+- HMAC-SHA256 signature verification prevents link tampering
+- Proper UTF-8 encoding/decoding for international characters (José, García, España, etc.)
+- Frontend uses TextDecoder for UTF-8 decoding, backend uses Buffer with utf8 encoding
+- Whitelisted scalar fields only (no nested objects/arrays for security)
+- TOKEN_SECRET environment variable required for signing (no hardcoded defaults)
+- Backend endpoints: POST /api/generate-prefill-url and POST /api/verify-prefill-token
+- Frontend shows "Form Pre-filled (Verified)" toast for signed tokens, error toast for tampered links
+- Supports fields: firstName, lastName, email, phone, phoneCountryCode, dateOfBirth, country, arrivalDate/Time, departureDate/Time, arrivalNotes
+
 ### Containerized Deployment with MinIO Integration (October 6, 2025)
 - Implemented unified storage interface (IStorageService) supporting both Google Cloud Storage and MinIO
 - Created FileDescriptor pattern for type-safe file download operations across storage backends

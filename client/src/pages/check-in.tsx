@@ -61,6 +61,112 @@ export default function CheckInPage() {
   const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   
+  // Parse URL parameters for pre-fill functionality
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    async function loadPreFillData() {
+      let preFillData: Partial<CheckInForm> = {};
+      let isVerified = false;
+      
+      // Priority 1: Check for signed token (most secure)
+      const signedToken = urlParams.get('token');
+      if (signedToken) {
+        try {
+          const response = await fetch('/api/verify-prefill-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: signedToken })
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            preFillData = result.data;
+            isVerified = result.verified;
+            console.log('Pre-filling form from verified token:', preFillData);
+          } else {
+            // Token verification failed - show error and prevent any pre-fill
+            toast({
+              title: "Invalid Link",
+              description: "This pre-filled link has been tampered with or is invalid. Please contact the sender for a new link.",
+              variant: "destructive"
+            });
+            // Don't try other pre-fill methods - explicitly halt
+            return;
+          }
+        } catch (error) {
+          console.error('Failed to verify token:', error);
+          toast({
+            title: "Error Loading Link",
+            description: "Unable to load the pre-filled link. Please try again or contact the sender.",
+            variant: "destructive"
+          });
+          // Don't try other pre-fill methods - explicitly halt
+          return;
+        }
+      }
+      // Priority 2: Check for individual query parameters (fallback)
+      else {
+        const dataToken = urlParams.get('data');
+        
+        // Unsigned 'data' tokens are deprecated for security reasons
+        if (dataToken) {
+          toast({
+            title: "Deprecated Link Format",
+            description: "This link uses an old unsigned format. Please request a new secure link from the sender.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Priority 3: Check for individual query parameters
+        const firstName = urlParams.get('firstName');
+        const lastName = urlParams.get('lastName');
+        const email = urlParams.get('email');
+        const phone = urlParams.get('phone');
+        const phoneCountryCode = urlParams.get('phoneCountryCode');
+        const dateOfBirth = urlParams.get('dateOfBirth');
+        const country = urlParams.get('country');
+        const arrivalDate = urlParams.get('arrivalDate');
+        const arrivalTime = urlParams.get('arrivalTime');
+        const departureDate = urlParams.get('departureDate');
+        const departureTime = urlParams.get('departureTime');
+        
+        if (firstName) preFillData.firstName = firstName;
+        if (lastName) preFillData.lastName = lastName;
+        if (email) preFillData.email = email;
+        if (phone) preFillData.phone = phone;
+        if (phoneCountryCode) preFillData.phoneCountryCode = phoneCountryCode;
+        if (dateOfBirth) preFillData.dateOfBirth = dateOfBirth;
+        if (country) preFillData.country = country;
+        if (arrivalDate) preFillData.arrivalDate = arrivalDate;
+        if (arrivalTime) preFillData.arrivalTime = arrivalTime;
+        if (departureDate) preFillData.departureDate = departureDate;
+        if (departureTime) preFillData.departureTime = departureTime;
+        
+        if (Object.keys(preFillData).length > 0) {
+          console.log('Pre-filling form from URL params:', preFillData);
+        }
+      }
+      
+      // Apply pre-fill data to form
+      if (Object.keys(preFillData).length > 0) {
+        Object.entries(preFillData).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            form.setValue(key as keyof CheckInForm, value as any);
+          }
+        });
+        
+        toast({
+          title: isVerified ? "Form Pre-filled (Verified)" : "Form Pre-filled",
+          description: "The form has been filled with your information. Please review and update as needed.",
+        });
+      }
+    }
+    
+    loadPreFillData();
+  }, []);
+  
   // Prevent unwanted scroll behavior
   useEffect(() => {
     let currentScroll = window.scrollY;
