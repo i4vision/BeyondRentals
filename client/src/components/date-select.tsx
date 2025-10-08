@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface DateSelectProps {
   value?: string;
@@ -14,6 +14,7 @@ const partialDates: Record<string, { month: string; day: string; year: string }>
 
 export default function DateSelect({ value = "", onChange, placeholder = "Select date", className = "", testIdPrefix = "date" }: DateSelectProps) {
   const stateKey = testIdPrefix || "default";
+  const [, forceUpdate] = useState({});
   
   // Parse value from props
   const parsedValue = useMemo(() => {
@@ -49,6 +50,7 @@ export default function DateSelect({ value = "", onChange, placeholder = "Select
 
   const handleMonthChange = (newMonth: string) => {
     partialDates[stateKey].month = newMonth;
+    forceUpdate({}); // Force re-render to show the selection
     // Only save to form when all parts are selected
     if (newMonth && partialDates[stateKey].day && partialDates[stateKey].year) {
       onChange(`${partialDates[stateKey].year}-${newMonth.padStart(2, '0')}-${partialDates[stateKey].day.padStart(2, '0')}`);
@@ -57,6 +59,7 @@ export default function DateSelect({ value = "", onChange, placeholder = "Select
 
   const handleDayChange = (newDay: string) => {
     partialDates[stateKey].day = newDay;
+    forceUpdate({}); // Force re-render to show the selection
     // Only save to form when all parts are selected
     if (partialDates[stateKey].month && newDay && partialDates[stateKey].year) {
       onChange(`${partialDates[stateKey].year}-${partialDates[stateKey].month.padStart(2, '0')}-${newDay.padStart(2, '0')}`);
@@ -65,6 +68,7 @@ export default function DateSelect({ value = "", onChange, placeholder = "Select
 
   const handleYearChange = (newYear: string) => {
     partialDates[stateKey].year = newYear;
+    forceUpdate({}); // Force re-render to show the selection
     // Only save to form when all parts are selected
     if (partialDates[stateKey].month && partialDates[stateKey].day && newYear) {
       onChange(`${newYear}-${partialDates[stateKey].month.padStart(2, '0')}-${partialDates[stateKey].day.padStart(2, '0')}`);
