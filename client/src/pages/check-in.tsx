@@ -302,7 +302,12 @@ export default function CheckInPage() {
   });
 
   const toggleSection = (section: string) => {
+    const currentScrollPos = window.scrollY;
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+    // Restore scroll position after React updates DOM
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollPos, behavior: 'instant' });
+    });
   };
 
   const handleAddGuest = (e: React.MouseEvent) => {
