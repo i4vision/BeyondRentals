@@ -88,11 +88,21 @@ export class S3StorageService implements IStorageService {
     const objectId = randomUUID();
     const key = `uploads/${objectId}`;
 
-    // Determine the public endpoint to use for signing
-    let signingEndpoint = this.internalEndpoint;
+    // Use MINIO_PUBLIC_ENDPOINT if configured, otherwise fall back to request host
+    let signingEndpoint = process.env.MINIO_PUBLIC_ENDPOINT || this.internalEndpoint;
+    let usePublicSSL = this.useSSL;
     
-    // If we have a request host, use it with the MinIO port (5001)
-    if (requestHost) {
+    // If MINIO_PUBLIC_ENDPOINT starts with https://, extract endpoint and enable SSL
+    if (signingEndpoint.startsWith('https://')) {
+      signingEndpoint = signingEndpoint.replace('https://', '');
+      usePublicSSL = true;
+    } else if (signingEndpoint.startsWith('http://')) {
+      signingEndpoint = signingEndpoint.replace('http://', '');
+      usePublicSSL = false;
+    }
+    
+    // Fallback: If no MINIO_PUBLIC_ENDPOINT and we have request host
+    if (!process.env.MINIO_PUBLIC_ENDPOINT && requestHost) {
       const hostParts = requestHost.split(':');
       const hostname = hostParts[0];
       const minioPort = process.env.MINIO_PUBLIC_PORT || '5001';
@@ -101,7 +111,7 @@ export class S3StorageService implements IStorageService {
 
     // Create a separate S3 client with the public endpoint for signing
     const signingClient = new S3Client({
-      endpoint: `http${this.useSSL ? 's' : ''}://${signingEndpoint}`,
+      endpoint: `http${usePublicSSL ? 's' : ''}://${signingEndpoint}`,
       region: 'us-east-1',
       credentials: {
         accessKeyId: this.accessKeyId,
