@@ -526,7 +526,7 @@ export default function CheckInPage() {
                     <Label htmlFor="arrivalDate">Arrival Date *</Label>
                     <DateSelect
                       value={form.watch("arrivalDate") || ""}
-                      onChange={(date) => form.setValue("arrivalDate", date)}
+                      onChange={(date) => form.setValue("arrivalDate", date, { shouldValidate: false })}
                       placeholder="Select arrival date"
                       className="mt-2"
                       testIdPrefix="arrival-date"
@@ -551,7 +551,7 @@ export default function CheckInPage() {
                     <Label htmlFor="departureDate">Departure Date *</Label>
                     <DateSelect
                       value={form.watch("departureDate") || ""}
-                      onChange={(date) => form.setValue("departureDate", date)}
+                      onChange={(date) => form.setValue("departureDate", date, { shouldValidate: false })}
                       placeholder="Select departure date"
                       className="mt-2"
                       testIdPrefix="departure-date"
