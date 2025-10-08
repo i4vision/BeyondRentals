@@ -26,8 +26,8 @@ services:
       - TOKEN_SECRET=${TOKEN_SECRET}
       # Public URL for generated links (optional, defaults to request URL)
       - PUBLIC_URL=${PUBLIC_URL:-https://byr.i4vision.us}
-      # Azure Logic Apps webhook URL (optional)
-      - VITE_WEBHOOK_URL=${VITE_WEBHOOK_URL}
+      # Azure Logic Apps webhook URL (optional, server-side)
+      - WEBHOOK_URL=${WEBHOOK_URL}
     volumes:
       # Mount uploads directory for file storage
       - ./uploads:/app/uploads

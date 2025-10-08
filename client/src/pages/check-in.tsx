@@ -230,15 +230,27 @@ export default function CheckInPage() {
     mutationFn: async (data: CheckInForm) => {
       const formData = new FormData();
       
+      // Convert relative URL to complete URL for webhook
+      const fullIdentityFileUrl = identityFileInfo?.url 
+        ? `${window.location.origin}${identityFileInfo.url}`
+        : null;
+      
       const submitData = {
         ...data,
         termsAccepted: data.termsAccepted ? "true" : "false",
         submittedAt: new Date().toISOString(),
+        // Include file info and signature for backend webhook submission
+        identityFileUrl: fullIdentityFileUrl,
+        identityFileName: identityFileInfo?.name || null,
+        identityFileSize: identityFileInfo?.size || null,
+        identityFileType: identityFileInfo?.type || null,
+        identityFileId: identityFileInfo?.id || null,
+        signatureImageData: signatureData || null,
       };
       
       formData.append('data', JSON.stringify(submitData));
 
-      // Submit to internal API first
+      // Submit to API - backend will handle webhook
       const response = await fetch('/api/check-ins', {
         method: 'POST',
         body: formData,
@@ -248,61 +260,7 @@ export default function CheckInPage() {
         throw new Error('Failed to submit check-in');
       }
 
-      const result = await response.json();
-
-      // Send to Azure Logic Apps webhook
-      try {
-        // Convert relative URL to complete URL for webhook
-        const fullIdentityFileUrl = identityFileInfo?.url 
-          ? `${window.location.origin}${identityFileInfo.url}`
-          : null;
-
-        const webhookData = {
-          ...submitData,
-          identityFileUrl: fullIdentityFileUrl,
-          identityFileName: identityFileInfo?.name || null,
-          identityFileSize: identityFileInfo?.size || null,
-          identityFileType: identityFileInfo?.type || null,
-          identityFileId: identityFileInfo?.id || null,
-          signatureImageData: signatureData || null,
-        };
-        
-        console.log('Debug - identityFileInfo:', identityFileInfo);
-        console.log('Debug - fullIdentityFileUrl:', fullIdentityFileUrl);
-        console.log('Debug - signatureData length:', signatureData?.length || 0);
-
-        console.log('Sending webhook data:', webhookData);
-        console.log('Exact JSON being sent to webhook:', JSON.stringify(webhookData, null, 2));
-        
-        const webhookUrl = import.meta.env.VITE_WEBHOOK_URL;
-        console.log('DEBUG - All VITE env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
-        console.log('DEBUG - webhookUrl value:', webhookUrl);
-        
-        if (webhookUrl) {
-          const webhookResponse = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(webhookData),
-          });
-
-          console.log('Webhook response status:', webhookResponse.status);
-          if (webhookResponse.ok) {
-            console.log('Webhook submission successful');
-          } else {
-            const errorText = await webhookResponse.text();
-            console.error('Webhook submission failed with status:', webhookResponse.status, 'Error:', errorText);
-          }
-        } else {
-          console.log('No webhook URL configured, skipping webhook submission');
-        }
-      } catch (webhookError) {
-        console.error('Webhook submission failed:', webhookError);
-        // Don't fail the entire submission if webhook fails
-      }
-
-      return result;
+      return await response.json();
     },
     onSuccess: () => {
       // Clear the form

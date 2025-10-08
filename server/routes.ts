@@ -122,6 +122,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const checkIn = await storage.createCheckIn(validatedData);
+      
+      // Send to webhook if configured
+      const webhookUrl = process.env.WEBHOOK_URL;
+      if (webhookUrl) {
+        try {
+          console.log('[Webhook] Sending data to:', webhookUrl);
+          
+          // Prepare webhook payload with all form data
+          const webhookPayload = {
+            ...validatedData,
+            identityFileUrl: formData.identityFileUrl || null,
+            identityFileName: formData.identityFileName || null,
+            identityFileSize: formData.identityFileSize || null,
+            identityFileType: formData.identityFileType || null,
+            identityFileId: formData.identityFileId || null,
+            signatureImageData: formData.signatureImageData || null,
+          };
+          
+          const webhookResponse = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(webhookPayload),
+          });
+          
+          console.log('[Webhook] Response status:', webhookResponse.status);
+          
+          if (webhookResponse.ok) {
+            console.log('[Webhook] Successfully sent to Azure Logic Apps');
+          } else {
+            const errorText = await webhookResponse.text();
+            console.error('[Webhook] Failed with status:', webhookResponse.status, 'Error:', errorText);
+          }
+        } catch (webhookError) {
+          console.error('[Webhook] Error sending to webhook:', webhookError);
+          // Don't fail the check-in if webhook fails
+        }
+      } else {
+        console.log('[Webhook] No webhook URL configured (set WEBHOOK_URL environment variable)');
+      }
+      
       res.json(checkIn);
     } catch (error) {
       if (error instanceof z.ZodError) {
