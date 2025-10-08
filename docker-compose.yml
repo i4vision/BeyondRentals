@@ -24,6 +24,8 @@ services:
       - SESSION_SECRET=${SESSION_SECRET:-your-super-secret-session-key-change-this-in-production}
       # Pre-fill token security (REQUIRED)
       - TOKEN_SECRET=${TOKEN_SECRET}
+      # Public URL for generated links (optional, defaults to request URL)
+      - PUBLIC_URL=${PUBLIC_URL:-https://byr.i4vision.us}
     volumes:
       # Mount uploads directory for file storage
       - ./uploads:/app/uploads

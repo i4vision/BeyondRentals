@@ -218,10 +218,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Get the base URL from the request
-      const protocol = req.protocol;
-      const host = req.get('host');
-      const baseUrl = `${protocol}://${host}`;
+      // Get the base URL - use PUBLIC_URL env var if set, otherwise use request URL
+      const baseUrl = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
       
       // Option 1: Generate URL with signed token (compact) with proper UTF-8 encoding
       const jsonString = JSON.stringify(sanitizedData);
