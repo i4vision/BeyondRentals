@@ -272,20 +272,26 @@ export default function CheckInPage() {
         console.log('Sending webhook data:', webhookData);
         console.log('Exact JSON being sent to webhook:', JSON.stringify(webhookData, null, 2));
         
-        const webhookResponse = await fetch('https://prod-03.westus.logic.azure.com:443/workflows/fc307344b6db4d4ca57a0e40dd794ca8/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J-m90Ua98MJkYH7Kh8D7nr4ydsYbcNZfS7qAacum6XU', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(webhookData),
-        });
+        const webhookUrl = import.meta.env.VITE_WEBHOOK_URL;
+        
+        if (webhookUrl) {
+          const webhookResponse = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(webhookData),
+          });
 
-        console.log('Webhook response status:', webhookResponse.status);
-        if (webhookResponse.ok) {
-          console.log('Webhook submission successful');
+          console.log('Webhook response status:', webhookResponse.status);
+          if (webhookResponse.ok) {
+            console.log('Webhook submission successful');
+          } else {
+            const errorText = await webhookResponse.text();
+            console.error('Webhook submission failed with status:', webhookResponse.status, 'Error:', errorText);
+          }
         } else {
-          const errorText = await webhookResponse.text();
-          console.error('Webhook submission failed with status:', webhookResponse.status, 'Error:', errorText);
+          console.log('No webhook URL configured, skipping webhook submission');
         }
       } catch (webhookError) {
         console.error('Webhook submission failed:', webhookError);
