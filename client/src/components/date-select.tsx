@@ -14,8 +14,9 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
   const [day, setDay] = useState<string>("");
   const [year, setYear] = useState<string>("");
   const isInternalChange = useRef(false);
+  const prevValue = useRef<string>("");
 
-  // Parse incoming value and update local state ONLY when it's an external change
+  // Parse incoming value and update local state ONLY when value prop actually changes
   useEffect(() => {
     // Skip if this is from our own onChange call
     if (isInternalChange.current) {
@@ -23,19 +24,18 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
       return;
     }
 
-    if (value) {
+    // Only process if the value actually changed
+    if (value && value !== prevValue.current) {
+      prevValue.current = value;
       const parts = value.split('-');
       if (parts.length === 3) {
         const parsedYear = parts[0];
         const parsedMonth = parseInt(parts[1], 10).toString();
         const parsedDay = parseInt(parts[2], 10).toString();
         
-        // Only update if different from current local state
-        if (parsedYear !== year || parsedMonth !== month || parsedDay !== day) {
-          setYear(parsedYear);
-          setMonth(parsedMonth);
-          setDay(parsedDay);
-        }
+        setYear(parsedYear);
+        setMonth(parsedMonth);
+        setDay(parsedDay);
       }
     }
   }, [value]);
