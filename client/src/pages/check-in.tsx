@@ -71,11 +71,22 @@ export default function CheckInPage() {
   const form = useForm<CheckInForm>({
     resolver: zodResolver(checkInSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      phoneCountryCode: "+1",
+      dateOfBirth: "",
+      country: "",
+      arrivalDate: "",
+      arrivalTime: "15:00",
+      arrivalNotes: "",
+      departureDate: "",
+      departureTime: "09:00",
       guests: [],
       termsAccepted: false,
-      arrivalTime: "15:00",
-      departureTime: "09:00",
     },
+    mode: "onChange",
     shouldFocusError: false,
   });
   
