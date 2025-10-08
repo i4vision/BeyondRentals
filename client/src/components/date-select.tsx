@@ -20,8 +20,9 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
       const parts = value.split('-');
       if (parts.length === 3) {
         setYear(parts[0]);
-        setMonth(parts[1]);
-        setDay(parts[2]);
+        // Remove leading zeros to match Select values
+        setMonth(parseInt(parts[1], 10).toString());
+        setDay(parseInt(parts[2], 10).toString());
       }
     }
   }, [value]);
