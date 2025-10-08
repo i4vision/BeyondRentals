@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import SignaturePadPersistent from "@/components/signature-pad-persistent";
 import CloudFileUpload from "@/components/cloud-file-upload";
+import DateSelect from "@/components/date-select";
 import { countryCodes, countries } from "@shared/schema";
 
 const guestSchema = z.object({
@@ -510,11 +511,12 @@ export default function CheckInPage() {
                   </div>
                   <div>
                     <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                    <Input
-                      id="dateOfBirth"
-                      type="date"
-                      {...form.register("dateOfBirth")}
-                      className="mt-2 enhanced-input"
+                    <DateSelect
+                      value={form.watch("dateOfBirth") || ""}
+                      onChange={(date) => form.setValue("dateOfBirth", date)}
+                      placeholder="Select date of birth"
+                      className="mt-2"
+                      testIdPrefix="dob"
                     />
                     {form.formState.errors.dateOfBirth && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.dateOfBirth.message}</p>
@@ -560,11 +562,12 @@ export default function CheckInPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="arrivalDate">Arrival Date *</Label>
-                    <Input
-                      id="arrivalDate"
-                      type="date"
-                      {...form.register("arrivalDate")}
-                      className="mt-2 enhanced-input"
+                    <DateSelect
+                      value={form.watch("arrivalDate") || ""}
+                      onChange={(date) => form.setValue("arrivalDate", date)}
+                      placeholder="Select arrival date"
+                      className="mt-2"
+                      testIdPrefix="arrival-date"
                     />
                     {form.formState.errors.arrivalDate && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.arrivalDate.message}</p>
@@ -584,11 +587,12 @@ export default function CheckInPage() {
                   </div>
                   <div>
                     <Label htmlFor="departureDate">Departure Date *</Label>
-                    <Input
-                      id="departureDate"
-                      type="date"
-                      {...form.register("departureDate")}
-                      className="mt-2 enhanced-input"
+                    <DateSelect
+                      value={form.watch("departureDate") || ""}
+                      onChange={(date) => form.setValue("departureDate", date)}
+                      placeholder="Select departure date"
+                      className="mt-2"
+                      testIdPrefix="departure-date"
                     />
                     {form.formState.errors.departureDate && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.departureDate.message}</p>
