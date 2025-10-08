@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useRef, useEffect } from "react";
 
 interface DateSelectProps {
   value?: string;
@@ -9,13 +9,17 @@ interface DateSelectProps {
   testIdPrefix?: string;
 }
 
+// Global state to persist partial selections across remounts
+const partialDates: Record<string, { month: string; day: string; year: string }> = {};
+
 export default function DateSelect({ value = "", onChange, placeholder = "Select date", className = "", testIdPrefix = "date" }: DateSelectProps) {
+  const stateKey = testIdPrefix || "default";
+  
   // Parse value from props
   const parsedValue = useMemo(() => {
     if (value) {
       const parts = value.split('-');
       if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
-        console.log(`DateSelect[${testIdPrefix}] - Parsed value:`, { month: parseInt(parts[1], 10).toString(), day: parseInt(parts[2], 10).toString(), year: parts[0] });
         return {
           month: parseInt(parts[1], 10).toString(),
           day: parseInt(parts[2], 10).toString(),
@@ -23,47 +27,47 @@ export default function DateSelect({ value = "", onChange, placeholder = "Select
         };
       }
     }
-    console.log(`DateSelect[${testIdPrefix}] - No valid value to parse, value="${value}"`);
     return null;
-  }, [value, testIdPrefix]);
+  }, [value]);
 
-  const [month, setMonth] = useState(parsedValue?.month || "");
-  const [day, setDay] = useState(parsedValue?.day || "");
-  const [year, setYear] = useState(parsedValue?.year || "");
+  // Initialize or restore from global state
+  if (!partialDates[stateKey]) {
+    partialDates[stateKey] = parsedValue || { month: "", day: "", year: "" };
+  }
 
-  console.log(`DateSelect[${testIdPrefix}] - Current state:`, { month, day, year, formValue: value });
+  const currentState = partialDates[stateKey];
+  const month = parsedValue?.month || currentState.month;
+  const day = parsedValue?.day || currentState.day;
+  const year = parsedValue?.year || currentState.year;
 
-  // Sync with form value when it's a complete valid date
+  // Sync global state when form value changes
   useEffect(() => {
     if (parsedValue) {
-      console.log(`DateSelect[${testIdPrefix}] - Syncing state with parsed value:`, parsedValue);
-      setMonth(parsedValue.month);
-      setDay(parsedValue.day);
-      setYear(parsedValue.year);
+      partialDates[stateKey] = parsedValue;
     }
-  }, [parsedValue, testIdPrefix]);
+  }, [parsedValue, stateKey]);
 
   const handleMonthChange = (newMonth: string) => {
-    setMonth(newMonth);
+    partialDates[stateKey].month = newMonth;
     // Only save to form when all parts are selected
-    if (newMonth && day && year) {
-      onChange(`${year}-${newMonth.padStart(2, '0')}-${day.padStart(2, '0')}`);
+    if (newMonth && partialDates[stateKey].day && partialDates[stateKey].year) {
+      onChange(`${partialDates[stateKey].year}-${newMonth.padStart(2, '0')}-${partialDates[stateKey].day.padStart(2, '0')}`);
     }
   };
 
   const handleDayChange = (newDay: string) => {
-    setDay(newDay);
+    partialDates[stateKey].day = newDay;
     // Only save to form when all parts are selected
-    if (month && newDay && year) {
-      onChange(`${year}-${month.padStart(2, '0')}-${newDay.padStart(2, '0')}`);
+    if (partialDates[stateKey].month && newDay && partialDates[stateKey].year) {
+      onChange(`${partialDates[stateKey].year}-${partialDates[stateKey].month.padStart(2, '0')}-${newDay.padStart(2, '0')}`);
     }
   };
 
   const handleYearChange = (newYear: string) => {
-    setYear(newYear);
+    partialDates[stateKey].year = newYear;
     // Only save to form when all parts are selected
-    if (month && day && newYear) {
-      onChange(`${newYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
+    if (partialDates[stateKey].month && partialDates[stateKey].day && newYear) {
+      onChange(`${newYear}-${partialDates[stateKey].month.padStart(2, '0')}-${partialDates[stateKey].day.padStart(2, '0')}`);
     }
   };
 
