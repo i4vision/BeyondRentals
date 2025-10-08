@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface DateSelectProps {
   value?: string;
@@ -10,11 +10,12 @@ interface DateSelectProps {
 }
 
 export default function DateSelect({ value = "", onChange, placeholder = "Select date", className = "", testIdPrefix = "date" }: DateSelectProps) {
-  // Parse value from props OR use local state for partial selections
+  // Parse value from props
   const parsedValue = useMemo(() => {
     if (value) {
       const parts = value.split('-');
-      if (parts.length === 3) {
+      if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+        console.log(`DateSelect[${testIdPrefix}] - Parsed value:`, { month: parseInt(parts[1], 10).toString(), day: parseInt(parts[2], 10).toString(), year: parts[0] });
         return {
           month: parseInt(parts[1], 10).toString(),
           day: parseInt(parts[2], 10).toString(),
@@ -22,37 +23,45 @@ export default function DateSelect({ value = "", onChange, placeholder = "Select
         };
       }
     }
-    return { month: "", day: "", year: "" };
-  }, [value]);
+    console.log(`DateSelect[${testIdPrefix}] - No valid value to parse, value="${value}"`);
+    return null;
+  }, [value, testIdPrefix]);
 
-  const [localMonth, setLocalMonth] = useState(parsedValue.month);
-  const [localDay, setLocalDay] = useState(parsedValue.day);
-  const [localYear, setLocalYear] = useState(parsedValue.year);
+  const [month, setMonth] = useState(parsedValue?.month || "");
+  const [day, setDay] = useState(parsedValue?.day || "");
+  const [year, setYear] = useState(parsedValue?.year || "");
 
-  // Use parsed value if available, otherwise local state
-  const month = parsedValue.month || localMonth;
-  const day = parsedValue.day || localDay;
-  const year = parsedValue.year || localYear;
+  console.log(`DateSelect[${testIdPrefix}] - Current state:`, { month, day, year, formValue: value });
+
+  // Sync with form value when it's a complete valid date
+  useEffect(() => {
+    if (parsedValue) {
+      console.log(`DateSelect[${testIdPrefix}] - Syncing state with parsed value:`, parsedValue);
+      setMonth(parsedValue.month);
+      setDay(parsedValue.day);
+      setYear(parsedValue.year);
+    }
+  }, [parsedValue, testIdPrefix]);
 
   const handleMonthChange = (newMonth: string) => {
-    setLocalMonth(newMonth);
-    // Only update parent if all parts are selected
+    setMonth(newMonth);
+    // Only save to form when all parts are selected
     if (newMonth && day && year) {
       onChange(`${year}-${newMonth.padStart(2, '0')}-${day.padStart(2, '0')}`);
     }
   };
 
   const handleDayChange = (newDay: string) => {
-    setLocalDay(newDay);
-    // Only update parent if all parts are selected
+    setDay(newDay);
+    // Only save to form when all parts are selected
     if (month && newDay && year) {
       onChange(`${year}-${month.padStart(2, '0')}-${newDay.padStart(2, '0')}`);
     }
   };
 
   const handleYearChange = (newYear: string) => {
-    setLocalYear(newYear);
-    // Only update parent if all parts are selected
+    setYear(newYear);
+    // Only save to form when all parts are selected
     if (month && day && newYear) {
       onChange(`${newYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`);
     }
