@@ -341,31 +341,32 @@ export default function CheckInPage() {
     children: React.ReactNode;
   }) => (
     <div className="border-b border-gray-200 last:border-b-0">
-      <Collapsible open={openSections[id]} onOpenChange={() => toggleSection(id)}>
-        <CollapsibleTrigger asChild>
-          <button 
-            type="button" 
-            className="w-full px-6 py-4 text-left focus:outline-none focus:bg-gray-50 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium mr-3">
-                  {step}
-                </div>
-                <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
-              </div>
-              <ChevronDown 
-                className={`h-5 w-5 transition-transform duration-200 ${
-                  openSections[id] ? 'transform rotate-180' : ''
-                }`} 
-              />
+      <button 
+        type="button" 
+        onClick={() => toggleSection(id)}
+        className="w-full px-6 py-4 text-left focus:outline-none focus:bg-gray-50 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-medium mr-3">
+              {step}
             </div>
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="px-6 pb-6">
-          {children}
-        </CollapsibleContent>
-      </Collapsible>
+            <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
+          </div>
+          <ChevronDown 
+            className={`h-5 w-5 transition-transform duration-200 ${
+              openSections[id] ? 'transform rotate-180' : ''
+            }`} 
+          />
+        </div>
+      </button>
+      <div 
+        className={`px-6 transition-all duration-200 overflow-hidden ${
+          openSections[id] ? 'pb-6 max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        {children}
+      </div>
     </div>
   );
 
