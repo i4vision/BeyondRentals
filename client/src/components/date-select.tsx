@@ -16,7 +16,7 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
   const isInternalChange = useRef(false);
   const prevValue = useRef<string>("");
 
-  // Parse incoming value and update local state ONLY when value prop actually changes
+  // Parse incoming value and update local state when value changes OR when component mounts with a value
   useEffect(() => {
     // Skip if this is from our own onChange call
     if (isInternalChange.current) {
@@ -24,8 +24,10 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
       return;
     }
 
-    // Only process if the value actually changed
-    if (value && value !== prevValue.current) {
+    // Process if: 1) value changed, OR 2) we have a value but local state is empty (e.g., on mount or remount)
+    const needsUpdate = value && (value !== prevValue.current || (!month && !day && !year));
+    
+    if (needsUpdate) {
       prevValue.current = value;
       const parts = value.split('-');
       if (parts.length === 3) {
@@ -38,7 +40,7 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
         setDay(parsedDay);
       }
     }
-  }, [value]);
+  }, [value, month, day, year]);
 
   // Notify parent when all parts are selected
   useEffect(() => {
