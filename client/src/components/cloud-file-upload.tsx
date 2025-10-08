@@ -4,7 +4,7 @@ import { CloudUpload, FileText, X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface CloudFileUploadProps {
-  onFileUploaded: (fileUrl: string, fileName: string, fileSize: number, fileType: string) => void;
+  onFileUploaded: (fileUrl: string, fileName: string, fileSize: number, fileType: string, fileId: string) => void;
   accept: string;
   maxSize?: number;
   className?: string;
@@ -83,21 +83,24 @@ export default function CloudFileUpload({
       const urlParts = storageUrl.split('/');
       
       let finalUrl = storageUrl;
+      let fileId = '';
       
       // Handle GCS URLs (replit-objstore bucket)
       const gcsIndex = urlParts.findIndex((part: string) => part.startsWith('replit-objstore'));
       if (gcsIndex !== -1 && urlParts[gcsIndex + 1] === '.private') {
         const objectPath = urlParts.slice(gcsIndex + 2).join('/');
+        fileId = urlParts[urlParts.length - 1]; // Extract the file ID (last part of URL)
         finalUrl = `/objects/${objectPath}`;
-        console.log('Converted GCS URL to app URL:', { storageUrl, appUrl: finalUrl });
+        console.log('Converted GCS URL to app URL:', { storageUrl, appUrl: finalUrl, fileId });
       } 
       // Handle MinIO/S3 URLs (uploads/ prefix)
       else {
         const uploadsIndex = urlParts.indexOf('uploads');
         if (uploadsIndex !== -1 && urlParts.length > uploadsIndex + 1) {
           const objectPath = urlParts.slice(uploadsIndex + 1).join('/');
+          fileId = urlParts[urlParts.length - 1]; // Extract the file ID (last part of URL)
           finalUrl = `/objects/${objectPath}`;
-          console.log('Converted MinIO URL to app URL:', { storageUrl, appUrl: finalUrl });
+          console.log('Converted MinIO URL to app URL:', { storageUrl, appUrl: finalUrl, fileId });
         }
       }
       
@@ -110,7 +113,7 @@ export default function CloudFileUpload({
       
       console.log('Setting uploaded file info:', fileInfo);
       setInternalUploadedFile(fileInfo);
-      onFileUploaded(fileInfo.url, fileInfo.name, fileInfo.size, fileInfo.type);
+      onFileUploaded(fileInfo.url, fileInfo.name, fileInfo.size, fileInfo.type, fileId);
       
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -136,7 +139,7 @@ export default function CloudFileUpload({
   const removeFile = () => {
     console.log('Removing uploaded file');
     setInternalUploadedFile(null);
-    onFileUploaded('', '', 0, '');
+    onFileUploaded('', '', 0, '', '');
   };
 
   const formatFileSize = (bytes: number) => {

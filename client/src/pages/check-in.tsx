@@ -65,6 +65,7 @@ export default function CheckInPage() {
     name: string;
     size: number;
     type: string;
+    id: string;
   } | null>(null);
 
   const form = useForm<CheckInForm>({
@@ -216,10 +217,10 @@ export default function CheckInPage() {
     setSignatureData(signature);
   }, []);
   
-  const handleFileUploaded = useCallback((fileUrl: string, fileName: string, fileSize: number, fileType: string) => {
-    console.log('Parent handleFileUploaded called with:', { fileUrl, fileName, fileSize, fileType });
+  const handleFileUploaded = useCallback((fileUrl: string, fileName: string, fileSize: number, fileType: string, fileId: string) => {
+    console.log('Parent handleFileUploaded called with:', { fileUrl, fileName, fileSize, fileType, fileId });
     if (fileUrl && fileName) {
-      setIdentityFileInfo({ url: fileUrl, name: fileName, size: fileSize, type: fileType });
+      setIdentityFileInfo({ url: fileUrl, name: fileName, size: fileSize, type: fileType, id: fileId });
     } else {
       setIdentityFileInfo(null);
     }
@@ -262,6 +263,7 @@ export default function CheckInPage() {
           identityFileName: identityFileInfo?.name || null,
           identityFileSize: identityFileInfo?.size || null,
           identityFileType: identityFileInfo?.type || null,
+          identityFileId: identityFileInfo?.id || null,
           signatureImageData: signatureData || null,
         };
         
