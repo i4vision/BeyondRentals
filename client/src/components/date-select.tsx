@@ -32,7 +32,8 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
       const dateString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
       onChange(dateString);
     }
-  }, [month, day, year, onChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [month, day, year]);
 
   const months = [
     { value: "1", label: "January" },
