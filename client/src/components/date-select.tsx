@@ -18,16 +18,21 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
 
   // Parse incoming value and update local state when value changes OR when component mounts with a value
   useEffect(() => {
+    console.log('[DateSelect] Effect - value:', value, 'month:', month, 'day:', day, 'year:', year, 'prevValue:', prevValue.current, 'isInternal:', isInternalChange.current);
+    
     // Skip if this is from our own onChange call
     if (isInternalChange.current) {
+      console.log('[DateSelect] Skipping - internal change');
       isInternalChange.current = false;
       return;
     }
 
     // Process if: 1) value changed, OR 2) we have a value but local state is empty (e.g., on mount or remount)
     const needsUpdate = value && (value !== prevValue.current || (!month && !day && !year));
+    console.log('[DateSelect] needsUpdate:', needsUpdate);
     
     if (needsUpdate) {
+      console.log('[DateSelect] Updating from value:', value);
       prevValue.current = value;
       const parts = value.split('-');
       if (parts.length === 3) {
@@ -35,6 +40,7 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
         const parsedMonth = parseInt(parts[1], 10).toString();
         const parsedDay = parseInt(parts[2], 10).toString();
         
+        console.log('[DateSelect] Setting state - month:', parsedMonth, 'day:', parsedDay, 'year:', parsedYear);
         setYear(parsedYear);
         setMonth(parsedMonth);
         setDay(parsedDay);
