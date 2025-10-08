@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect, useRef } from "react";
+import { useMemo } from "react";
 
 interface DateSelectProps {
   value?: string;
@@ -9,61 +9,35 @@ interface DateSelectProps {
   testIdPrefix?: string;
 }
 
-export default function DateSelect({ value, onChange, placeholder = "Select date", className = "", testIdPrefix = "date" }: DateSelectProps) {
-  const [month, setMonth] = useState<string>("");
-  const [day, setDay] = useState<string>("");
-  const [year, setYear] = useState<string>("");
-  const isInternalChange = useRef(false);
-  const prevValue = useRef<string>("");
-
-  // Parse incoming value and update local state when value changes OR when component mounts with a value
-  useEffect(() => {
-    // Skip if this is from our own onChange call
-    if (isInternalChange.current) {
-      isInternalChange.current = false;
-      return;
-    }
-
-    // Process if: 1) value changed, OR 2) we have a value but local state is empty (e.g., on mount or remount)
-    const needsUpdate = value && (value !== prevValue.current || (!month && !day && !year));
-    
-    if (needsUpdate) {
-      prevValue.current = value;
+export default function DateSelect({ value = "", onChange, placeholder = "Select date", className = "", testIdPrefix = "date" }: DateSelectProps) {
+  // Parse value from props
+  const { month, day, year } = useMemo(() => {
+    if (value) {
       const parts = value.split('-');
       if (parts.length === 3) {
-        const parsedYear = parts[0];
-        const parsedMonth = parseInt(parts[1], 10).toString();
-        const parsedDay = parseInt(parts[2], 10).toString();
-        
-        setYear(parsedYear);
-        setMonth(parsedMonth);
-        setDay(parsedDay);
+        return {
+          month: parseInt(parts[1], 10).toString(),
+          day: parseInt(parts[2], 10).toString(),
+          year: parts[0]
+        };
       }
     }
-  }, [value, month, day, year]);
-
-  // Notify parent when all parts are selected
-  useEffect(() => {
-    if (month && day && year) {
-      const dateString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      // Only emit if different from current value to avoid loops
-      if (dateString !== value) {
-        isInternalChange.current = true;
-        onChange(dateString);
-      }
-    }
-  }, [month, day, year]);
+    return { month: "", day: "", year: "" };
+  }, [value]);
 
   const handleMonthChange = (newMonth: string) => {
-    setMonth(newMonth);
+    const newValue = `${year || new Date().getFullYear()}-${newMonth.padStart(2, '0')}-${(day || "1").padStart(2, '0')}`;
+    onChange(newValue);
   };
 
   const handleDayChange = (newDay: string) => {
-    setDay(newDay);
+    const newValue = `${year || new Date().getFullYear()}-${(month || "1").padStart(2, '0')}-${newDay.padStart(2, '0')}`;
+    onChange(newValue);
   };
 
   const handleYearChange = (newYear: string) => {
-    setYear(newYear);
+    const newValue = `${newYear}-${(month || "1").padStart(2, '0')}-${(day || "1").padStart(2, '0')}`;
+    onChange(newValue);
   };
 
   const months = [
