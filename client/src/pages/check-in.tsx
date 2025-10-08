@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
@@ -473,12 +473,18 @@ export default function CheckInPage() {
                   </div>
                   <div>
                     <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-                    <DateSelect
-                      value={form.watch("dateOfBirth") || ""}
-                      onChange={(date) => form.setValue("dateOfBirth", date)}
-                      placeholder="Select date of birth"
-                      className="mt-2"
-                      testIdPrefix="dob"
+                    <Controller
+                      name="dateOfBirth"
+                      control={form.control}
+                      render={({ field }) => (
+                        <DateSelect
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          placeholder="Select date of birth"
+                          className="mt-2"
+                          testIdPrefix="dob"
+                        />
+                      )}
                     />
                     {form.formState.errors.dateOfBirth && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.dateOfBirth.message}</p>
@@ -524,12 +530,18 @@ export default function CheckInPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label htmlFor="arrivalDate">Arrival Date *</Label>
-                    <DateSelect
-                      value={form.watch("arrivalDate") || ""}
-                      onChange={(date) => form.setValue("arrivalDate", date, { shouldValidate: false })}
-                      placeholder="Select arrival date"
-                      className="mt-2"
-                      testIdPrefix="arrival-date"
+                    <Controller
+                      name="arrivalDate"
+                      control={form.control}
+                      render={({ field }) => (
+                        <DateSelect
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          placeholder="Select arrival date"
+                          className="mt-2"
+                          testIdPrefix="arrival-date"
+                        />
+                      )}
                     />
                     {form.formState.errors.arrivalDate && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.arrivalDate.message}</p>
@@ -549,12 +561,18 @@ export default function CheckInPage() {
                   </div>
                   <div>
                     <Label htmlFor="departureDate">Departure Date *</Label>
-                    <DateSelect
-                      value={form.watch("departureDate") || ""}
-                      onChange={(date) => form.setValue("departureDate", date, { shouldValidate: false })}
-                      placeholder="Select departure date"
-                      className="mt-2"
-                      testIdPrefix="departure-date"
+                    <Controller
+                      name="departureDate"
+                      control={form.control}
+                      render={({ field }) => (
+                        <DateSelect
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          placeholder="Select departure date"
+                          className="mt-2"
+                          testIdPrefix="departure-date"
+                        />
+                      )}
                     />
                     {form.formState.errors.departureDate && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.departureDate.message}</p>
