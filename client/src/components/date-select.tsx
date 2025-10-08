@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 interface DateSelectProps {
   value?: string;
@@ -10,31 +10,41 @@ interface DateSelectProps {
 }
 
 export default function DateSelect({ value, onChange, placeholder = "Select date", className = "", testIdPrefix = "date" }: DateSelectProps) {
-  const [month, setMonth] = useState<string>("");
-  const [day, setDay] = useState<string>("");
-  const [year, setYear] = useState<string>("");
-
-  // Parse initial value
-  useEffect(() => {
+  // Parse the incoming value
+  const { month, day, year } = useMemo(() => {
     if (value) {
       const parts = value.split('-');
       if (parts.length === 3) {
-        setYear(parts[0]);
-        // Remove leading zeros to match Select values
-        setMonth(parseInt(parts[1], 10).toString());
-        setDay(parseInt(parts[2], 10).toString());
+        return {
+          year: parts[0],
+          month: parseInt(parts[1], 10).toString(),
+          day: parseInt(parts[2], 10).toString(),
+        };
       }
     }
+    return { month: "", day: "", year: "" };
   }, [value]);
 
-  // Update parent when any part changes
-  useEffect(() => {
-    if (month && day && year) {
-      const dateString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const handleMonthChange = (newMonth: string) => {
+    if (day && year) {
+      const dateString = `${year}-${newMonth.padStart(2, '0')}-${day.padStart(2, '0')}`;
       onChange(dateString);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [month, day, year]);
+  };
+
+  const handleDayChange = (newDay: string) => {
+    if (month && year) {
+      const dateString = `${year}-${month.padStart(2, '0')}-${newDay.padStart(2, '0')}`;
+      onChange(dateString);
+    }
+  };
+
+  const handleYearChange = (newYear: string) => {
+    if (month && day) {
+      const dateString = `${newYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      onChange(dateString);
+    }
+  };
 
   const months = [
     { value: "1", label: "January" },
@@ -57,7 +67,7 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
 
   return (
     <div className={`flex items-center gap-1 ${className}`}>
-      <Select value={month} onValueChange={setMonth}>
+      <Select value={month} onValueChange={handleMonthChange}>
         <SelectTrigger className="flex-1" data-testid={`${testIdPrefix}-month`}>
           <SelectValue placeholder="Month" />
         </SelectTrigger>
@@ -70,7 +80,7 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
         </SelectContent>
       </Select>
       <span className="text-gray-400">/</span>
-      <Select value={day} onValueChange={setDay}>
+      <Select value={day} onValueChange={handleDayChange}>
         <SelectTrigger className="flex-1" data-testid={`${testIdPrefix}-day`}>
           <SelectValue placeholder="Day" />
         </SelectTrigger>
@@ -83,7 +93,7 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
         </SelectContent>
       </Select>
       <span className="text-gray-400">/</span>
-      <Select value={year} onValueChange={setYear}>
+      <Select value={year} onValueChange={handleYearChange}>
         <SelectTrigger className="flex-1" data-testid={`${testIdPrefix}-year`}>
           <SelectValue placeholder="Year" />
         </SelectTrigger>
