@@ -312,18 +312,28 @@ export default function CheckInPage() {
 
   const handleAddGuest = (e: React.MouseEvent) => {
     e.preventDefault();
+    const currentScrollPos = window.scrollY;
     const currentGuests = form.getValues("guests") || [];
     const newGuests = [...currentGuests, { firstName: "", lastName: "", age: 0 }];
     setGuests(newGuests);
     form.setValue("guests", newGuests);
+    // Restore scroll position after React updates DOM
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollPos, behavior: 'instant' });
+    });
   };
 
   const handleRemoveGuest = (index: number, e: React.MouseEvent) => {
     e.preventDefault();
+    const currentScrollPos = window.scrollY;
     const currentGuests = form.getValues("guests") || [];
     const newGuests = currentGuests.filter((_, i) => i !== index);
     setGuests(newGuests);
     form.setValue("guests", newGuests);
+    // Restore scroll position after React updates DOM
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: currentScrollPos, behavior: 'instant' });
+    });
   };
 
 
