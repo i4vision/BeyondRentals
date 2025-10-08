@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface DateSelectProps {
   value?: string;
@@ -10,40 +10,47 @@ interface DateSelectProps {
 }
 
 export default function DateSelect({ value, onChange, placeholder = "Select date", className = "", testIdPrefix = "date" }: DateSelectProps) {
-  // Parse the incoming value
-  const { month, day, year } = useMemo(() => {
+  const [month, setMonth] = useState<string>("");
+  const [day, setDay] = useState<string>("");
+  const [year, setYear] = useState<string>("");
+
+  // Parse incoming value and update local state
+  useEffect(() => {
     if (value) {
       const parts = value.split('-');
       if (parts.length === 3) {
-        return {
-          year: parts[0],
-          month: parseInt(parts[1], 10).toString(),
-          day: parseInt(parts[2], 10).toString(),
-        };
+        const parsedYear = parts[0];
+        const parsedMonth = parseInt(parts[1], 10).toString();
+        const parsedDay = parseInt(parts[2], 10).toString();
+        
+        setYear(parsedYear);
+        setMonth(parsedMonth);
+        setDay(parsedDay);
       }
     }
-    return { month: "", day: "", year: "" };
   }, [value]);
 
-  const handleMonthChange = (newMonth: string) => {
-    if (day && year) {
-      const dateString = `${year}-${newMonth.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      onChange(dateString);
+  // Notify parent when all parts are selected
+  useEffect(() => {
+    if (month && day && year) {
+      const dateString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      // Only emit if different from current value to avoid loops
+      if (dateString !== value) {
+        onChange(dateString);
+      }
     }
+  }, [month, day, year]);
+
+  const handleMonthChange = (newMonth: string) => {
+    setMonth(newMonth);
   };
 
   const handleDayChange = (newDay: string) => {
-    if (month && year) {
-      const dateString = `${year}-${month.padStart(2, '0')}-${newDay.padStart(2, '0')}`;
-      onChange(dateString);
-    }
+    setDay(newDay);
   };
 
   const handleYearChange = (newYear: string) => {
-    if (month && day) {
-      const dateString = `${newYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-      onChange(dateString);
-    }
+    setYear(newYear);
   };
 
   const months = [
