@@ -18,18 +18,14 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
 
   // Parse incoming value and update local state ONLY when value prop actually changes
   useEffect(() => {
-    console.log('[DateSelect] useEffect triggered - value:', value, 'prevValue:', prevValue.current, 'isInternalChange:', isInternalChange.current);
-    
     // Skip if this is from our own onChange call
     if (isInternalChange.current) {
-      console.log('[DateSelect] Skipping - internal change');
       isInternalChange.current = false;
       return;
     }
 
     // Only process if the value actually changed
     if (value && value !== prevValue.current) {
-      console.log('[DateSelect] Processing new value:', value);
       prevValue.current = value;
       const parts = value.split('-');
       if (parts.length === 3) {
@@ -37,13 +33,10 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
         const parsedMonth = parseInt(parts[1], 10).toString();
         const parsedDay = parseInt(parts[2], 10).toString();
         
-        console.log('[DateSelect] Setting state - month:', parsedMonth, 'day:', parsedDay, 'year:', parsedYear);
         setYear(parsedYear);
         setMonth(parsedMonth);
         setDay(parsedDay);
       }
-    } else {
-      console.log('[DateSelect] No update - value unchanged or empty');
     }
   }, [value]);
 

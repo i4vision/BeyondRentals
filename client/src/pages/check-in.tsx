@@ -446,7 +446,7 @@ export default function CheckInPage() {
                       onValueChange={(value) => {
                         // Extract just the code part (before the dash)
                         const code = value.split('-')[0];
-                        form.setValue("phoneCountryCode", code);
+                        form.setValue("phoneCountryCode", code, { shouldValidate: false });
                       }}>
                         <SelectTrigger className="w-32 rounded-r-none enhanced-select">
                           <SelectValue placeholder="Code" />
@@ -488,7 +488,7 @@ export default function CheckInPage() {
                     <Label htmlFor="country">Country *</Label>
                     <Select 
                       value={form.watch("country") || ""}
-                      onValueChange={(value) => form.setValue("country", value)}>
+                      onValueChange={(value) => form.setValue("country", value, { shouldValidate: false })}>
                       <SelectTrigger className="mt-2 enhanced-select">
                         <SelectValue placeholder="Select your country" />
                       </SelectTrigger>
