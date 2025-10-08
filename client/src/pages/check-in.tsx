@@ -436,29 +436,35 @@ export default function CheckInPage() {
                   <div>
                     <Label>Phone Number *</Label>
                     <div className="flex mt-2">
-                      <Select 
-                      value={(() => {
-                        const code = form.watch("phoneCountryCode") || "";
-                        // Find the first matching country for this code to create a unique value
-                        const country = countryCodes.find(c => c.code === code);
-                        return country ? `${code}-${country.country}` : code;
-                      })()}
-                      onValueChange={(value) => {
-                        // Extract just the code part (before the dash)
-                        const code = value.split('-')[0];
-                        form.setValue("phoneCountryCode", code, { shouldValidate: false });
-                      }}>
-                        <SelectTrigger className="w-32 rounded-r-none enhanced-select">
-                          <SelectValue placeholder="Code" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {countryCodes.map((country) => (
-                            <SelectItem key={`${country.country}-${country.code}`} value={`${country.code}-${country.country}`}>
-                              {country.flag} {country.code} ({country.name})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Controller
+                        name="phoneCountryCode"
+                        control={form.control}
+                        render={({ field }) => {
+                          const code = field.value || "";
+                          const country = countryCodes.find(c => c.code === code);
+                          const selectValue = country ? `${code}-${country.country}` : code;
+                          
+                          return (
+                            <Select 
+                              value={selectValue}
+                              onValueChange={(value) => {
+                                const code = value.split('-')[0];
+                                field.onChange(code);
+                              }}>
+                              <SelectTrigger className="w-32 rounded-r-none enhanced-select">
+                                <SelectValue placeholder="Code" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {countryCodes.map((country) => (
+                                  <SelectItem key={`${country.country}-${country.code}`} value={`${country.code}-${country.country}`}>
+                                    {country.flag} {country.code} ({country.name})
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          );
+                        }}
+                      />
                       <Input
                         {...form.register("phone")}
                         placeholder="555-123-4567"
@@ -492,20 +498,26 @@ export default function CheckInPage() {
                   </div>
                   <div>
                     <Label htmlFor="country">Country *</Label>
-                    <Select 
-                      value={form.watch("country") || ""}
-                      onValueChange={(value) => form.setValue("country", value, { shouldValidate: false })}>
-                      <SelectTrigger className="mt-2 enhanced-select">
-                        <SelectValue placeholder="Select your country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="country"
+                      control={form.control}
+                      render={({ field }) => (
+                        <Select 
+                          value={field.value || ""}
+                          onValueChange={field.onChange}>
+                          <SelectTrigger className="mt-2 enhanced-select">
+                            <SelectValue placeholder="Select your country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {countries.map((country) => (
+                              <SelectItem key={country.code} value={country.code}>
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                     {form.formState.errors.country && (
                       <p className="text-red-500 text-sm mt-1">{form.formState.errors.country.message}</p>
                     )}
