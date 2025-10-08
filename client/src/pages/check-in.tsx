@@ -275,6 +275,8 @@ export default function CheckInPage() {
         console.log('Exact JSON being sent to webhook:', JSON.stringify(webhookData, null, 2));
         
         const webhookUrl = import.meta.env.VITE_WEBHOOK_URL;
+        console.log('DEBUG - All VITE env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')));
+        console.log('DEBUG - webhookUrl value:', webhookUrl);
         
         if (webhookUrl) {
           const webhookResponse = await fetch(webhookUrl, {
