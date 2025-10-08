@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface DateSelectProps {
   value?: string;
@@ -13,9 +13,16 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
   const [month, setMonth] = useState<string>("");
   const [day, setDay] = useState<string>("");
   const [year, setYear] = useState<string>("");
+  const isInternalChange = useRef(false);
 
-  // Parse incoming value and update local state
+  // Parse incoming value and update local state ONLY when it's an external change
   useEffect(() => {
+    // Skip if this is from our own onChange call
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+
     if (value) {
       const parts = value.split('-');
       if (parts.length === 3) {
@@ -23,9 +30,12 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
         const parsedMonth = parseInt(parts[1], 10).toString();
         const parsedDay = parseInt(parts[2], 10).toString();
         
-        setYear(parsedYear);
-        setMonth(parsedMonth);
-        setDay(parsedDay);
+        // Only update if different from current local state
+        if (parsedYear !== year || parsedMonth !== month || parsedDay !== day) {
+          setYear(parsedYear);
+          setMonth(parsedMonth);
+          setDay(parsedDay);
+        }
       }
     }
   }, [value]);
@@ -36,6 +46,7 @@ export default function DateSelect({ value, onChange, placeholder = "Select date
       const dateString = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
       // Only emit if different from current value to avoid loops
       if (dateString !== value) {
+        isInternalChange.current = true;
         onChange(dateString);
       }
     }
