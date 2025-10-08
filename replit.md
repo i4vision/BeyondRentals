@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes (October 2025)
 
+### Guest Section Simplification (October 8, 2025)
+- Made additional guests optional - form can be submitted without any guests
+- Simplified guest fields to only: First Name, Last Name, and Age (removed phone and email)
+- Updated UI to show 3-column layout for guest information
+- Updated database schema to support new guest structure with age field
+- Guest section now clearly indicates "(optional)" in the alert message
+
 ### URL-Based Form Pre-fill Functionality (October 7, 2025)
 - Implemented secure pre-filled form links to send personalized check-in forms to guests
 - Three methods supported: signed tokens (secure), unsigned tokens (legacy), and query parameters

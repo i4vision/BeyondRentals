@@ -23,8 +23,7 @@ import { countryCodes, countries } from "@shared/schema";
 const guestSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  phone: z.string().min(1, "Phone is required"),
-  email: z.string().email("Invalid email address"),
+  age: z.coerce.number().min(0, "Age must be a positive number").max(150, "Age must be valid"),
 });
 
 const checkInSchema = z.object({
@@ -45,7 +44,7 @@ const checkInSchema = z.object({
   departureTime: z.string().min(1, "Departure time is required"),
   
   // Guests
-  guests: z.array(guestSchema).min(1, "At least one guest is required"),
+  guests: z.array(guestSchema).optional(),
   
   // Terms
   termsAccepted: z.boolean().refine(val => val === true, "You must accept the terms"),
@@ -58,7 +57,7 @@ export default function CheckInPage() {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     "lead-guest": true,
   });
-  const [guests, setGuests] = useState([{ firstName: "", lastName: "", phone: "", email: "" }]);
+  const [guests, setGuests] = useState<Array<{ firstName: string; lastName: string; age: number }>>([]);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [identityFileInfo, setIdentityFileInfo] = useState<{
     url: string;
@@ -70,7 +69,7 @@ export default function CheckInPage() {
   const form = useForm<CheckInForm>({
     resolver: zodResolver(checkInSchema),
     defaultValues: {
-      guests: [{ firstName: "", lastName: "", phone: "", email: "" }],
+      guests: [],
       termsAccepted: false,
       arrivalTime: "15:00",
       departureTime: "09:00",
@@ -305,7 +304,7 @@ export default function CheckInPage() {
       form.reset();
       
       // Reset additional state
-      setGuests([{ firstName: "", lastName: "", phone: "", email: "" }]);
+      setGuests([]);
       setSignatureData(null);
       setIdentityFileInfo(null);
       
@@ -335,7 +334,7 @@ export default function CheckInPage() {
   const handleAddGuest = (e: React.MouseEvent) => {
     e.preventDefault();
     const currentGuests = form.getValues("guests") || [];
-    const newGuests = [...currentGuests, { firstName: "", lastName: "", phone: "", email: "" }];
+    const newGuests = [...currentGuests, { firstName: "", lastName: "", age: 0 }];
     setGuests(newGuests);
     form.setValue("guests", newGuests);
   };
@@ -343,11 +342,9 @@ export default function CheckInPage() {
   const handleRemoveGuest = (index: number, e: React.MouseEvent) => {
     e.preventDefault();
     const currentGuests = form.getValues("guests") || [];
-    if (currentGuests.length > 1) {
-      const newGuests = currentGuests.filter((_, i) => i !== index);
-      setGuests(newGuests);
-      form.setValue("guests", newGuests);
-    }
+    const newGuests = currentGuests.filter((_, i) => i !== index);
+    setGuests(newGuests);
+    form.setValue("guests", newGuests);
   };
 
 
@@ -646,31 +643,31 @@ export default function CheckInPage() {
                 <Alert className="mb-6 border-amber-200 bg-amber-50">
                   <Users className="h-4 w-4 text-amber-600" />
                   <AlertDescription className="text-amber-800">
-                    Please provide the full name of each guest who will be staying at the property.
+                    Please provide the full name and age of each additional guest who will be staying at the property (optional).
                   </AlertDescription>
                 </Alert>
 
                 <div className="space-y-4">
-                  {guests.map((guest, index) => (
+                  {guests.length > 0 && guests.map((guest, index) => (
                     <div key={index} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-md font-medium text-gray-700">Guest {index + 1}</h4>
-                        {guests.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => handleRemoveGuest(index, e)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            Remove
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleRemoveGuest(index, e)}
+                          className="text-red-500 hover:text-red-700"
+                          data-testid={`button-remove-guest-${index}`}
+                        >
+                          Remove
+                        </Button>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <Label>First Name *</Label>
                           <Input
+                            data-testid={`input-guest-firstname-${index}`}
                             {...form.register(`guests.${index}.firstName`)}
                             placeholder="First name"
                             className="mt-2 enhanced-input"
@@ -679,26 +676,22 @@ export default function CheckInPage() {
                         <div>
                           <Label>Last Name *</Label>
                           <Input
+                            data-testid={`input-guest-lastname-${index}`}
                             {...form.register(`guests.${index}.lastName`)}
                             placeholder="Last name"
                             className="mt-2 enhanced-input"
                           />
                         </div>
                         <div>
-                          <Label>Phone *</Label>
+                          <Label>Age *</Label>
                           <Input
-                            {...form.register(`guests.${index}.phone`)}
-                            placeholder="Phone number"
+                            data-testid={`input-guest-age-${index}`}
+                            type="number"
+                            {...form.register(`guests.${index}.age`)}
+                            placeholder="Age"
                             className="mt-2 enhanced-input"
-                          />
-                        </div>
-                        <div>
-                          <Label>Email *</Label>
-                          <Input
-                            type="email"
-                            {...form.register(`guests.${index}.email`)}
-                            placeholder="Email address"
-                            className="mt-2 enhanced-input"
+                            min="0"
+                            max="150"
                           />
                         </div>
                       </div>
@@ -711,8 +704,9 @@ export default function CheckInPage() {
                   variant="outline"
                   onClick={handleAddGuest}
                   className="w-full mt-4 border-dashed border-2 hover:border-red-500 hover:text-red-500"
+                  data-testid="button-add-guest"
                 >
-                  Add Another Guest
+                  Add Guest
                 </Button>
               </AccordionSection>
 

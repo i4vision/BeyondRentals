@@ -29,9 +29,8 @@ export const checkIns = pgTable("check_ins", {
   guests: json("guests").$type<Array<{
     firstName: string;
     lastName: string;
-    phone: string;
-    email: string;
-  }>>().notNull(),
+    age: number;
+  }>>(),
   
   // Identity document
   identityDocumentPath: text("identity_document_path"),
