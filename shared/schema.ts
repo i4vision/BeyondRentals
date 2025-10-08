@@ -12,15 +12,11 @@ export const checkIns = pgTable("check_ins", {
   phone: text("phone").notNull(),
   phoneCountryCode: text("phone_country_code").notNull(),
   dateOfBirth: text("date_of_birth").notNull(),
-  address: text("address").notNull(),
-  city: text("city").notNull(),
-  postalCode: text("postal_code").notNull(),
   country: text("country").notNull(),
   
   // Arrival & departure
   arrivalDate: text("arrival_date").notNull(),
   arrivalTime: text("arrival_time").notNull(),
-  travelingBy: text("traveling_by").notNull(),
   arrivalNotes: text("arrival_notes"),
   departureDate: text("departure_date").notNull(),
   departureTime: text("departure_time").notNull(),
